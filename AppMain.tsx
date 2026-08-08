@@ -174,7 +174,6 @@ const AppMain: React.FC = () => {
   };
 
   const [showGuide, setShowGuide] = useState<boolean>(false);
-  const [showSubjectGrade, setShowSubjectGrade] = useState<boolean>(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-50 font-sans pb-12">
@@ -212,31 +211,11 @@ const AppMain: React.FC = () => {
             </div>
 
             {/* BƯỚC 1: Môn học & Khối lớp */}
-            <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-4 rounded-2xl border border-slate-200 space-y-3 shadow-inner">
-              <div 
-                className="flex items-center justify-between border-b border-slate-200 pb-2 cursor-pointer hover:bg-white -mx-2 px-2 rounded-lg transition-colors"
-                onClick={() => setShowSubjectGrade(!showSubjectGrade)}
-              >
-                <span className="text-sm font-extrabold text-blue-900 uppercase tracking-wider">
-                  Bước 1: Chọn Môn & Lớp
-                </span>
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs md:text-sm font-bold text-blue-700 bg-white border border-blue-200 px-3 py-1 rounded-lg shadow-sm">
-                    {subject} - Lớp {grade}
-                  </span>
-                  {showSubjectGrade ? <ChevronUp size={18} className="text-blue-600"/> : <ChevronDown size={18} className="text-blue-600"/>}
-                </div>
-              </div>
-              
-              {showSubjectGrade && (
-                <div className="pt-1">
-                  <LessonForm
-                    subject={subject} setSubject={setSubject}
-                    grade={grade} setGrade={setGrade}
-                  />
-                </div>
-              )}
-            </div>
+            <LessonForm
+              subject={subject} setSubject={setSubject}
+              grade={grade} setGrade={setGrade}
+            />
+
 
             {/* BƯỚC 2: Upload Tài liệu bài dạy */}
             <div className="bg-slate-50/80 p-3 rounded-xl border border-slate-200 space-y-2">
