@@ -39,16 +39,13 @@ const App: React.FC = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/api-guide" element={<ApiGuide />} />
         
-        {/* Protected Routes cho User */}
+        {/* Cho phép sử dụng ứng dụng trực tiếp KHÔNG CẦN ĐĂNG KÝ / ĐĂNG NHẬP */}
+        <Route path="/app" element={<AppMain />} />
+
+        {/* Protected Routes cho User Dashboard */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <UserDashboard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/app" element={
-          <ProtectedRoute>
-            <AppMain />
           </ProtectedRoute>
         } />
 
