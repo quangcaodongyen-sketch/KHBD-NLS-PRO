@@ -397,9 +397,14 @@ export const generateNLSLessonPlan = async (
       error.message = errorMessage;
       lastError = error;
 
-      // Stop immediately on invalid API key
-      if (errorMessage.includes("403") || errorMessage.includes("API key not valid") || errorMessage.includes("INVALID_ARGUMENT")) {
-        throw new Error("API Key không hợp lệ hoặc đã bị khóa. Vui lòng lấy API key từ https://aistudio.google.com/app/apikey và cập nhật lại.");
+      // Stop immediately on invalid or leaked API key
+      if (
+        errorMessage.includes("403") ||
+        errorMessage.includes("API key not valid") ||
+        errorMessage.includes("INVALID_ARGUMENT") ||
+        errorMessage.toLowerCase().includes("leaked")
+      ) {
+        throw new Error("API Key này đã bị Google vô hiệu hóa (do hệ thống Google phát hiện lộ chìa khóa bảo mật). Vui lòng bấm vào nút màu đỏ 'Lấy API key để sử dụng app' hoặc mở https://aistudio.google.com/app/apikey để tạo 1 API Key mới miễn phí trong 15 giây.");
       }
 
       // Check if we should retry with next model

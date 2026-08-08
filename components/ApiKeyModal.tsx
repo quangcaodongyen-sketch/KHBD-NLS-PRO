@@ -64,27 +64,30 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                 </div>
 
                 <div className="p-6">
-                    {/* Banner Hướng dẫn lấy API Key đơn giản nhất */}
-                    <div className="mb-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 text-xs text-slate-700">
-                        <div className="flex items-center space-x-2 text-amber-900 font-bold mb-2 text-sm">
-                            <span>🔑 HƯỚNG DẪN LẤY API KEY MIỄN PHÍ (30 GIÂY)</span>
+                    {/* Banner Hướng dẫn lấy API Key siêu đơn giản */}
+                    <div className="mb-4 bg-red-50 border-2 border-red-200 rounded-2xl p-4 text-slate-800">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="font-extrabold text-red-700 text-sm flex items-center">
+                                <Key className="mr-1.5 text-red-600" size={18} />
+                                LẤY API KEY MIỄN PHÍ SIÊU TỐC (CHỈ 2 BƯỚC)
+                            </span>
+                            <span className="text-[10px] bg-red-600 text-white font-bold px-2 py-0.5 rounded-full">
+                                100% Miễn phí
+                            </span>
                         </div>
-                        <ol className="space-y-1.5 list-decimal list-inside text-slate-800 font-medium">
-                            <li>Bấm vào nút đỏ <b>"Lấy API Key ngay"</b> bên dưới (mở tab Google AI Studio).</li>
-                            <li>Đăng nhập Gmail của bạn & bấm nút <b>"Create API key"</b>.</li>
-                            <li>Sao chép (Copy) mã <b>AIzaSy...</b> dán vào ô bên dưới và bấm <b>"Lưu cấu hình"</b>.</li>
+                        <ol className="space-y-2 text-xs font-semibold text-slate-700 list-decimal list-inside">
+                            <li>
+                                Bấm nút đỏ: <a
+                                    href="https://aistudio.google.com/app/apikey"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center font-extrabold text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded-lg text-xs transition-all shadow mx-1"
+                                >
+                                    👉 LẤY API KEY TẠI ĐÂY
+                                </a>
+                            </li>
+                            <li>Bấm <b>"Create API key"</b> trên trang Google ➔ <b>Copy</b> chuỗi mã dán vào ô bên dưới ➔ Bấm <b>Lưu & Sử dụng</b>.</li>
                         </ol>
-                        <div className="mt-3 pt-2 border-t border-amber-200/80 flex items-center justify-between">
-                            <a
-                                href="https://aistudio.google.com/app/apikey"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center space-x-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition-all shadow-md hover:shadow-red-500/30"
-                            >
-                                <span>👉 BẤM VÀO ĐÂY ĐỂ LẤY API KEY</span>
-                            </a>
-                            <span className="text-[11px] text-slate-500 italic">Google cấp miễn phí 100%</span>
-                        </div>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-5">

@@ -133,7 +133,11 @@ const AppMain: React.FC = () => {
       }
     } catch (err: any) {
       console.error("Process Error:", err);
-      setError(err.message || "Đã xảy ra lỗi không xác định khi kết nối với AI.");
+      const msg = err.message || "Đã xảy ra lỗi không xác định khi kết nối với AI.";
+      setError(msg);
+      if (msg.includes("API Key") || msg.toLowerCase().includes("leaked") || msg.includes("vô hiệu hóa")) {
+        setShowApiKeyModal(true);
+      }
     } finally {
       setLoading(false);
     }

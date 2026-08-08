@@ -38,16 +38,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenSettings, apiKeySet = true }) => 
             </span>
           </button>
 
-          <Link
-            to="/dashboard"
-            className="p-2.5 hover:bg-white/15 rounded-xl transition-colors text-blue-100 hover:text-white flex items-center space-x-1 border border-transparent hover:border-white/10"
-            title="Trang cá nhân"
-          >
-            <User size={19} />
-            <span className="hidden md:inline text-xs font-semibold">Dashboard</span>
-          </Link>
-
-          <div className="hidden lg:flex items-center space-x-1.5 text-blue-100 bg-white/10 px-3 py-1.5 rounded-xl text-xs border border-white/10">
+          <div className="hidden sm:flex items-center space-x-1.5 text-blue-100 bg-white/10 px-3 py-1.5 rounded-xl text-xs border border-white/10">
             <Sparkles size={14} className="text-amber-300" />
             <span>Gemini AI 3.0</span>
           </div>
