@@ -246,7 +246,6 @@ export async function parseDocxWithMath(arrayBuffer: ArrayBuffer): Promise<DocxP
             ommlCount
           };
         }
-      }
     }
   } catch (e) {
     console.warn('[DocxMathParser] XML parsing failed, falling back to mammoth text:', e);
