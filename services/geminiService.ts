@@ -319,11 +319,12 @@ export const generateNLSLessonPlan = async (
     ${options.detailedReport ? "- Kèm theo bảng giải thích chi tiết mã năng lực đã chọn ở cuối bài." : ""}
     ${options.standardizeNd30 ? "- CHUẨN HÓA THỂ THỨC VĂN BẢN THEO NGHỊ ĐỊNH 30/2020/NĐ-CP: Áp dụng chuẩn thể thức văn bản hành chính Việt Nam (Font Times New Roman, Tiêu đề bài dạy IN HOA ĐẬM căn giữa, các mục I, II, III... IN HOA ĐẬM, các tiểu mục 1, 2, 3... in thường đậm, lùi đầu dòng 1.27cm, căn đều 2 bên)." : ""}
     
-    YÊU CẦU VỀ ĐỊNH DẠNG (BẮT BUỘC):
-    1. GIỮ NGUYÊN ĐỊNH DẠNG GỐC: Bạn phải giữ nguyên các đoạn in đậm (**text**), in nghiêng (*text*) của văn bản gốc. Không được làm mất định dạng này.
-    2. TOÁN HỌC: Tất cả công thức toán phải viết dạng LaTeX trong dấu $. Ví dụ: $x^2$. Không dùng unicode.
-    3. BẢNG: Sử dụng Markdown Table chuẩn.
-    4. NLS BỔ SUNG: Dùng thẻ <red>...</red> để bọc nội dung bạn thêm vào. Hệ thống sẽ đổi nó thành chữ màu đỏ.
+    YÊU CẦU VỀ ĐỊNH DẠNG & BẢO TOÀN NỘI DUNG (BẮT BUỘC):
+    1. GIỮ NGUYÊN 100% NỘI DUNG GỐC: Tuyệt đối CẤM cắt bớt, tóm tắt hoặc xóa bất kỳ từ/câu/tiêu đề nào của giáo án gốc. Giữ nguyên 100% văn bản gốc và chỉ CHÈN THÊM nội dung NLS.
+    2. GIỮ NGUYÊN ĐỊNH DẠNG GỐC: Bạn phải giữ nguyên các đoạn in đậm (**text**), in nghiêng (*text*) của văn bản gốc. Không được làm mất định dạng này.
+    3. TOÁN HỌC: Tất cả công thức toán phải viết dạng LaTeX trong dấu $. Ví dụ: $x^2$. Không dùng unicode.
+    4. BẢNG: Sử dụng Markdown Table chuẩn.
+    5. NLS BỔ SUNG: Dùng thẻ <red>...</red> để bọc nội dung bạn thêm vào. Hệ thống sẽ đổi nó thành chữ màu đỏ.
     
     LƯU Ý VỀ TÍCH HỢP HOẠT ĐỘNG (KHI CÓ PPCT):
     - Các hoạt động dạy học (trong phần Tiến trình) cũng chỉ được thiết kế xoay quanh các năng lực số đã trích xuất từ PPCT. Không thiết kế hoạt động cho các năng lực nằm ngoài PPCT.

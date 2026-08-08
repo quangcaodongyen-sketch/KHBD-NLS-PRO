@@ -14,7 +14,8 @@ import {
   TableCell,
   BorderStyle,
   WidthType,
-  AlignmentType
+  AlignmentType,
+  TableLayoutType
 } from 'docx';
 import FileSaver from 'file-saver';
 import JSZip from 'jszip';
@@ -84,53 +85,53 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
 
           if (subPart === 'NỘI_DUNG') {
             searchPatterns = [
-              ...actPatterns,
               'b) Nội dung', 'b. Nội dung', 'Nội dung:', 'b)Nội dung',
-              '* Nội dung', '- Nội dung', 'NỘI DUNG'
+              '* Nội dung', '- Nội dung', 'NỘI DUNG',
+              ...actPatterns
             ];
           } else if (subPart === 'SẢN_PHẨM') {
             searchPatterns = [
-              ...actPatterns,
               'c) Sản phẩm', 'c. Sản phẩm', 'Sản phẩm:', 'c)Sản phẩm',
-              '* Sản phẩm', '- Sản phẩm', 'SẢN PHẨM'
+              '* Sản phẩm', '- Sản phẩm', 'SẢN PHẨM',
+              ...actPatterns
             ];
           } else if (subPart === 'TỔ_CHỨC') {
             searchPatterns = [
-              ...actPatterns,
               'd) Tổ chức thực hiện', 'd. Tổ chức thực hiện', 'd)Tổ chức',
               'Tổ chức thực hiện', 'd) Tổ chức', 'd. Tổ chức',
-              '* Tổ chức', 'TỔ CHỨC THỰC HIỆN'
+              '* Tổ chức', 'TỔ CHỨC THỰC HIỆN',
+              ...actPatterns
             ];
           } else if (subPart === 'MỤC_TIÊU_HĐ') {
             searchPatterns = [
-              ...actPatterns,
               'a) Mục tiêu', 'a. Mục tiêu', 'Mục tiêu:', 'a)Mục tiêu',
-              '* Mục tiêu', '- Mục tiêu'
+              '* Mục tiêu', '- Mục tiêu',
+              ...actPatterns
             ];
           } else if (subPart === 'BƯỚC_1') {
             searchPatterns = [
-              ...actPatterns,
               'Bước 1:', 'Bước 1.', 'Bước 1 ', 'bước 1',
-              'Giao nhiệm vụ', 'Chuyển giao nhiệm vụ', 'Chuyển giao'
+              'Giao nhiệm vụ', 'Chuyển giao nhiệm vụ', 'Chuyển giao',
+              ...actPatterns
             ];
           } else if (subPart === 'BƯỚC_2') {
             searchPatterns = [
-              ...actPatterns,
               'Bước 2:', 'Bước 2.', 'Bước 2 ', 'bước 2',
-              'Thực hiện nhiệm vụ', 'HS thực hiện'
+              'Thực hiện nhiệm vụ', 'HS thực hiện',
+              ...actPatterns
             ];
           } else if (subPart === 'BƯỚC_3') {
             searchPatterns = [
-              ...actPatterns,
               'Bước 3:', 'Bước 3.', 'Bước 3 ', 'bước 3',
-              'Báo cáo', 'Thảo luận', 'Trình bày', 'báo cáo, thảo luận'
+              'Báo cáo', 'Thảo luận', 'Trình bày', 'báo cáo, thảo luận',
+              ...actPatterns
             ];
           } else if (subPart === 'BƯỚC_4' || subPart === 'KẾT_LUẬN') {
             searchPatterns = [
-              ...actPatterns,
               'Bước 4:', 'Bước 4.', 'Bước 4 ', 'bước 4',
               'Kết luận', 'Nhận định', 'Đánh giá', 'kết luận, nhận định',
-              'Kết luận, nhận định'
+              'Kết luận, nhận định',
+              ...actPatterns
             ];
           } else {
             searchPatterns = actPatterns;
@@ -202,39 +203,39 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
 
           if (subPart === 'CONTENT') {
             searchPatterns = [
-              ...actPatterns,
               'b) Content', 'b. Content', 'Content:', 'b)Content',
-              '* Content', '- Content', 'CONTENT'
+              '* Content', '- Content', 'CONTENT',
+              ...actPatterns
             ];
           } else if (subPart === 'OUTCOMES') {
             searchPatterns = [
-              ...actPatterns,
               'c) Outcomes', 'c. Outcomes', 'Outcomes:', 'c)Outcomes',
-              '* Outcomes', '- Outcomes', 'OUTCOMES'
+              '* Outcomes', '- Outcomes', 'OUTCOMES',
+              ...actPatterns
             ];
           } else if (subPart === 'ORGANIZATION') {
             searchPatterns = [
-              ...actPatterns,
               'd) Organization', 'd. Organization', 'd)Organization',
               'Organization:', 'd) Organization', 'd. Organization',
               '* Organization', 'ORGANIZATION',
-              "TEACHER'S ACTIVITIES", "STUDENTS' ACTIVITIES"
+              "TEACHER'S ACTIVITIES", "STUDENTS' ACTIVITIES",
+              ...actPatterns
             ];
           } else if (subPart === 'OBJECTIVE') {
             searchPatterns = [
-              ...actPatterns,
               'a) Objective', 'a. Objective', 'Objective:', 'a)Objective',
-              '* Objective', '- Objective'
+              '* Objective', '- Objective',
+              ...actPatterns
             ];
           } else if (subPart === 'TEACHER_ACTIVITIES') {
             searchPatterns = [
-              ...actPatterns,
-              "TEACHER'S ACTIVITIES", "Teacher's Activities", "Teacher's activities"
+              "TEACHER'S ACTIVITIES", "Teacher's Activities", "Teacher's activities",
+              ...actPatterns
             ];
           } else if (subPart === 'STUDENT_ACTIVITIES') {
             searchPatterns = [
-              ...actPatterns,
-              "STUDENTS' ACTIVITIES", "Students' Activities", "Students' activities"
+              "STUDENTS' ACTIVITIES", "Students' Activities", "Students' activities",
+              ...actPatterns
             ];
           } else {
             searchPatterns = actPatterns;
@@ -276,15 +277,17 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
     return sections;
   };
 
-  // Helper: Tạo Table
+  // Helper: Tạo Table khoá định dạng cột & chống vỡ hàng
   const createTableFromMarkdown = (tableLines: string[]): Table | null => {
     try {
       const validLines = tableLines.filter(line => !line.match(/^\|?\s*[-:]+[-|\s:]*\|?\s*$/));
-      const rows = validLines.map(line => {
+      const rows = validLines.map((line, rowIndex) => {
         const cells = line.split('|');
         if (line.trim().startsWith('|')) cells.shift();
         if (line.trim().endsWith('|')) cells.pop();
         return new TableRow({
+          cantSplit: true,
+          tableHeader: rowIndex === 0,
           children: cells.map(cellContent => new TableCell({
             children: [new Paragraph({ children: parseTextWithFormatting(cellContent.trim()) })],
             borders: {
@@ -293,11 +296,15 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
               left: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
               right: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
             },
-            width: { size: 100 / cells.length, type: WidthType.PERCENTAGE }
+            width: { size: Math.floor(100 / (cells.length || 1)), type: WidthType.PERCENTAGE }
           }))
         });
       });
-      return new Table({ rows: rows, width: { size: 100, type: WidthType.PERCENTAGE } });
+      return new Table({
+        rows: rows,
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        layout: TableLayoutType.FIXED
+      });
     } catch (e) {
       return null;
     }
@@ -414,28 +421,88 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
       .trim();
   };
 
+  // Thuật toán định vị phạm vi Hoạt động (Scoped Activity Search)
   const findAndInsertAfter = (
     xml: string,
     searchPatterns: string[],
-    nlsMarkdown: string
+    nlsMarkdown: string,
+    marker: string = ''
   ): { result: string; inserted: boolean } => {
     const pRegex = /<w:p(?:\s+[^>]*)?>[\s\S]*?<\/w:p>/g;
-    let match: RegExpExecArray | null;
 
+    // Kiểm tra xem marker có chỉ định Hoạt động cụ thể không (VD: NLS_HOẠT_ĐỘNG_2_NỘI_DUNG)
+    let searchScopeXml = xml;
+    let scopeOffset = 0;
+
+    const actMatch = marker.match(/(?:HOẠT_ĐỘNG_|ACTIVITY_)(\d+)/i);
+    if (actMatch) {
+      const actNum = parseInt(actMatch[1], 10);
+      const nextActNum = actNum + 1;
+
+      // Tìm vị trí tiêu đề "Hoạt động actNum"
+      const actPattern = new RegExp(`(Hoạt động|HĐ|Activity)\\s*${actNum}`, 'i');
+      pRegex.lastIndex = 0;
+      let startMatch: RegExpExecArray | null = null;
+      let endMatchIndex = xml.length;
+
+      let pMatch: RegExpExecArray | null;
+      while ((pMatch = pRegex.exec(xml)) !== null) {
+        const text = extractPlainTextFromXmlParagraph(pMatch[0]);
+        if (!startMatch && actPattern.test(text)) {
+          startMatch = pMatch;
+        } else if (startMatch && new RegExp(`(Hoạt động|HĐ|Activity)\\s*${nextActNum}`, 'i').test(text)) {
+          endMatchIndex = pMatch.index;
+          break;
+        }
+      }
+
+      if (startMatch) {
+        scopeOffset = startMatch.index;
+        searchScopeXml = xml.slice(scopeOffset, endMatchIndex);
+      }
+    }
+
+    // Tiến hành tìm kiếm pattern trong phạm vi searchScopeXml
     for (const pattern of searchPatterns) {
       const cleanPattern = pattern.trim().toLowerCase();
       if (!cleanPattern) continue;
 
       pRegex.lastIndex = 0;
-      while ((match = pRegex.exec(xml)) !== null) {
+      let match: RegExpExecArray | null;
+      while ((match = pRegex.exec(searchScopeXml)) !== null) {
         const fullPXml = match[0];
         const pPlainText = extractPlainTextFromXmlParagraph(fullPXml).toLowerCase();
 
         if (pPlainText.includes(cleanPattern)) {
           const contentToInsert = convertMarkdownToWordXml(nlsMarkdown, fullPXml);
-          const insertIndex = match.index + fullPXml.length;
-          const newXml = xml.slice(0, insertIndex) + contentToInsert + xml.slice(insertIndex);
+          const localInsertIndex = match.index + fullPXml.length;
+          const globalInsertIndex = scopeOffset + localInsertIndex;
+
+          const newXml = xml.slice(0, globalInsertIndex) + contentToInsert + xml.slice(globalInsertIndex);
           return { result: newXml, inserted: true };
+        }
+      }
+    }
+
+    // Nếu tìm trong phạm vi bị giới hạn thất bại, tìm kiếm toàn cục làm fallback
+    if (scopeOffset > 0) {
+      pRegex.lastIndex = 0;
+      for (const pattern of searchPatterns) {
+        const cleanPattern = pattern.trim().toLowerCase();
+        if (!cleanPattern) continue;
+
+        pRegex.lastIndex = 0;
+        let match: RegExpExecArray | null;
+        while ((match = pRegex.exec(xml)) !== null) {
+          const fullPXml = match[0];
+          const pPlainText = extractPlainTextFromXmlParagraph(fullPXml).toLowerCase();
+
+          if (pPlainText.includes(cleanPattern)) {
+            const contentToInsert = convertMarkdownToWordXml(nlsMarkdown, fullPXml);
+            const globalInsertIndex = match.index + fullPXml.length;
+            const newXml = xml.slice(0, globalInsertIndex) + contentToInsert + xml.slice(globalInsertIndex);
+            return { result: newXml, inserted: true };
+          }
         }
       }
     }
@@ -462,7 +529,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
     let notInsertedSections: string[] = [];
 
     for (const section of sections) {
-      const { result, inserted } = findAndInsertAfter(documentXml, section.searchPatterns, section.content);
+      const { result, inserted } = findAndInsertAfter(documentXml, section.searchPatterns, section.content, section.marker);
 
       if (inserted) {
         documentXml = result;
@@ -573,10 +640,14 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
       sections: [{
         properties: {
           page: {
+            size: {
+              width: 11906,  // 21.0cm A4
+              height: 16838, // 29.7cm A4
+            },
             margin: {
-              top: 1134, // 2cm
+              top: 1134,   // 2cm
               bottom: 1134, // 2cm
-              left: 1701, // 3cm
+              left: 1701,  // 3cm
               right: 1134, // 2cm
             },
           },
