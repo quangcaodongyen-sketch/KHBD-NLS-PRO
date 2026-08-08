@@ -603,8 +603,6 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
     );
   }
 
-  if (!result) return null;
-
   const components = {
     red: ({ children }: { children: React.ReactNode }) => (
       <span style={{ color: '#FF0000', fontFamily: "'Times New Roman', Times, serif", fontWeight: 400 }}>{children}</span>
@@ -688,7 +686,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
     ),
   };
 
-  const sections = parseAllNLSSections(result);
+  const sections = result ? parseAllNLSSections(result) : [];
 
   const getCleanResultForPreview = (content: string): string => {
     return content
@@ -702,82 +700,88 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-blue-200 overflow-hidden transition-all duration-300">
       {/* Action Header Banner */}
-      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-800 px-6 py-6 text-white flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-800 px-6 py-5 text-white flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center space-x-3 text-center md:text-left">
-          <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-sm shadow-inner shrink-0 hidden sm:block">
-            <CheckCircle className="text-green-400" size={32} />
+          <div className="p-2.5 bg-white/10 rounded-xl backdrop-blur-sm shadow-inner shrink-0 hidden sm:block">
+            <CheckCircle className="text-green-400" size={28} />
           </div>
           <div>
             <div className="flex items-center justify-center md:justify-start space-x-2">
               <span className="bg-green-500/30 text-green-300 border border-green-400/40 text-xs px-2.5 py-0.5 rounded-full font-bold">
-                ✓ HOÀN THÀNH
+                {result ? '✓ ĐÃ PHÂN TÍCH' : '📋 GIAO DIỆN SO SÁNH'}
               </span>
-              <h2 className="text-xl font-bold tracking-tight text-white">Đã Tích Hợp Năng Lực Số!</h2>
+              <h2 className="text-lg font-bold tracking-tight text-white">So sánh Giáo án Gốc & Tích hợp NLS</h2>
             </div>
-            <p className="text-blue-100 text-xs mt-1">
-              Tạo thành công <strong>{sections.length} vị trí</strong> tích hợp NLS • Nội dung NLS hiển thị <span className="text-red-300 font-bold">chữ màu đỏ</span>
+            <p className="text-blue-100 text-xs mt-0.5">
+              {result ? (
+                <>Đã chèn NLS vào <strong>{sections.length} mục</strong> • Nội dung bổ sung hiển thị <span className="text-red-300 font-bold">chữ màu đỏ</span></>
+              ) : (
+                'Quan sát trực quan giáo án ban đầu và giáo án tự động tích hợp Năng lực số'
+              )}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={generateDocx}
-            disabled={isGeneratingDoc}
-            className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg hover:shadow-green-500/25 active:scale-95"
-          >
-            {isGeneratingDoc ? (
-              <span className="animate-pulse">Đang tạo file...</span>
-            ) : (
-              <>
-                <Download size={18} />
-                <span>TẢI FILE WORD (.DOCX)</span>
-              </>
-            )}
-          </button>
-        </div>
+        {result && (
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={generateDocx}
+              disabled={isGeneratingDoc}
+              className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-bold text-xs transition-all shadow-lg hover:shadow-green-500/25 active:scale-95"
+            >
+              {isGeneratingDoc ? (
+                <span className="animate-pulse">Đang xuất file...</span>
+              ) : (
+                <>
+                  <Download size={16} />
+                  <span>TẢI FILE WORD (.DOCX)</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Mode Selector Toolbar */}
-      <div className="bg-slate-100 px-6 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-slate-100 px-6 py-2.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center space-x-2">
-          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Chế độ xem trước:</span>
+          <span className="font-bold text-slate-600 uppercase tracking-wider text-[11px]">Chế độ:</span>
           <div className="bg-white p-1 rounded-xl shadow-inner border border-slate-200 flex space-x-1">
             <button
               onClick={() => { setViewMode('split'); setShowPreview(true); }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              className={`px-3 py-1.2 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${
                 viewMode === 'split' && showPreview
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
-              <span>📱 Xem 2 Cửa Sổ Song Song (Chuẩn MS Word)</span>
+              <span>📱 Song song (Gốc vs NLS)</span>
             </button>
             <button
               onClick={() => { setViewMode('single'); setShowPreview(true); }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              className={`px-3 py-1.2 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${
                 viewMode === 'single' && showPreview
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
-              <span>📄 Xem 1 Cửa Sổ Kết Quả NLS</span>
+              <span>📄 Giáo án NLS</span>
             </button>
           </div>
         </div>
 
         <div className="flex items-center space-x-3">
-          <span className="hidden sm:inline text-[11px] font-semibold text-slate-500 bg-slate-200/70 px-2.5 py-1 rounded-md">
-            📝 Font Times New Roman 13.5pt • Căn đều 2 bên • Lề 1.27cm
+          <span className="hidden sm:inline font-semibold text-slate-500 bg-slate-200/70 px-2.5 py-1 rounded-md text-[11px]">
+            📝 Times New Roman 13.5pt • Căn đều 2 bên • Lề 1.27cm
           </span>
           <button
             onClick={() => setShowPreview(!showPreview)}
-            className="text-xs text-blue-700 font-bold hover:underline flex items-center space-x-1"
+            className="text-blue-700 font-bold hover:underline flex items-center space-x-1 text-xs"
           >
             {showPreview ? (
-              <><span>Ẩn xem trước</span> <ChevronUp size={14} /></>
+              <><span>Thu gọn</span> <ChevronUp size={14} /></>
             ) : (
-              <><span>Hiện xem trước</span> <ChevronDown size={14} /></>
+              <><span>Mở rộng</span> <ChevronDown size={14} /></>
             )}
           </button>
         </div>
@@ -790,14 +794,14 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
             /* 2 cửa sổ so sánh song song mô phỏng Trang Word A4 */
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Cửa sổ 1: Giáo án gốc */}
-              <div className="bg-white rounded-2xl shadow-lg border border-slate-300 overflow-hidden flex flex-col h-[700px]">
-                <div className="bg-slate-800 text-white px-5 py-3.5 flex items-center justify-between border-b border-slate-700 shrink-0">
+              <div className="bg-white rounded-2xl shadow-lg border border-slate-300 overflow-hidden flex flex-col h-[650px]">
+                <div className="bg-slate-800 text-white px-4 py-3 flex items-center justify-between border-b border-slate-700 shrink-0">
                   <div className="flex items-center space-x-2">
-                    <FileText size={18} className="text-slate-300" />
-                    <h3 className="font-bold text-sm text-slate-100">1. GIÁO ÁN GỐC (Chưa tích hợp NLS)</h3>
+                    <FileText size={16} className="text-slate-300" />
+                    <h3 className="font-bold text-xs uppercase tracking-wider text-slate-100">1. Giáo án gốc</h3>
                   </div>
-                  <span className="text-[11px] bg-slate-700 text-slate-200 px-2.5 py-0.5 rounded-full font-medium">
-                    Text ban đầu
+                  <span className="text-[10px] bg-slate-700 text-slate-200 px-2 py-0.5 rounded-full font-medium">
+                    Văn bản ban đầu
                   </span>
                 </div>
 
@@ -811,55 +815,71 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
                       {originalContent}
                     </div>
                   ) : (
-                    <p className="text-slate-400 italic text-center py-12">
-                      (Nội dung giáo án gốc không khả dụng dưới dạng text thô)
-                    </p>
+                    <div className="text-slate-400 text-center py-20 flex flex-col items-center justify-center">
+                      <FileText size={40} className="mb-3 opacity-40" />
+                      <p className="font-medium text-sm">Chưa có văn bản giáo án gốc</p>
+                      <p className="text-xs mt-1 text-slate-400">Tải lên file .docx hoặc dán nội dung ở khung bên trên</p>
+                    </div>
                   )}
                 </div>
               </div>
 
               {/* Cửa sổ 2: Giáo án đã tích hợp NLS */}
-              <div className="bg-white rounded-2xl shadow-lg border border-blue-400 overflow-hidden flex flex-col h-[700px]">
-                <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-5 py-3.5 flex items-center justify-between border-b border-blue-900 shrink-0">
+              <div className="bg-white rounded-2xl shadow-lg border border-blue-400 overflow-hidden flex flex-col h-[650px]">
+                <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-4 py-3 flex items-center justify-between border-b border-blue-900 shrink-0">
                   <div className="flex items-center space-x-2">
-                    <CheckCircle size={18} className="text-green-300" />
-                    <h3 className="font-bold text-sm text-white">2. GIÁO ÁN TÍCH HỢP NLS (Chuẩn file Word tải về)</h3>
+                    <CheckCircle size={16} className="text-green-300" />
+                    <h3 className="font-bold text-xs uppercase tracking-wider text-white">2. Giáo án NLS</h3>
                   </div>
-                  <span className="text-[11px] bg-red-500 text-white px-2.5 py-0.5 rounded-full font-bold animate-pulse">
+                  <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-full font-bold">
                     NLS màu đỏ
                   </span>
                 </div>
 
                 {/* Giả lập trang giấy A4 Word với định dạng chuẩn */}
                 <div className="p-6 md:p-8 overflow-y-auto flex-1 bg-white scrollbar-thin text-slate-900 border-l-4 border-l-blue-600" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
-                  <ReactMarkdown
-                    rehypePlugins={[rehypeRaw]}
-                    components={components as any}
-                  >
-                    {getCleanResultForPreview(result)}
-                  </ReactMarkdown>
+                  {result ? (
+                    <ReactMarkdown
+                      rehypePlugins={[rehypeRaw]}
+                      components={components as any}
+                    >
+                      {getCleanResultForPreview(result)}
+                    </ReactMarkdown>
+                  ) : (
+                    <div className="text-slate-400 text-center py-20 flex flex-col items-center justify-center">
+                      <CheckCircle size={40} className="mb-3 opacity-30 text-blue-400" />
+                      <p className="font-medium text-sm text-slate-600">Đang chờ tích hợp Năng lực số</p>
+                      <p className="text-xs mt-1 text-slate-400 max-w-xs">Sau khi bấm "TÍCH HỢP NĂNG LỰC SỐ", kết quả chèn màu đỏ sẽ hiển thị tại đây</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           ) : (
             /* Chế độ xem 1 cửa sổ (Single Window Mode chuẩn A4) */
             <div className="bg-white rounded-2xl shadow-lg border border-blue-300 overflow-hidden max-w-4xl mx-auto">
-              <div className="bg-blue-950 text-white px-6 py-3.5 flex items-center justify-between border-b border-blue-800">
-                <h3 className="font-bold text-sm flex items-center">
-                  <FileText size={16} className="mr-2 text-blue-300" />
-                  XEM TRƯỚC NỘI DUNG GIÁO ÁN CHUẨN MS WORD (TÍCH HỢP NLS MÀU ĐỎ)
+              <div className="bg-blue-950 text-white px-5 py-3 flex items-center justify-between border-b border-blue-800">
+                <h3 className="font-bold text-xs uppercase tracking-wider flex items-center">
+                  <FileText size={15} className="mr-2 text-blue-300" />
+                  Giáo án tích hợp Năng lực số
                 </h3>
-                <span className="text-xs bg-red-600 text-white font-bold px-3 py-1 rounded-full">
-                  Chuẩn 13.5pt • Times New Roman
+                <span className="text-[11px] bg-red-600 text-white font-bold px-2.5 py-0.5 rounded-full">
+                  Times New Roman 13.5pt
                 </span>
               </div>
               <div className="p-8 md:p-12 bg-white text-slate-900 shadow-inner" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
-                <ReactMarkdown
-                  rehypePlugins={[rehypeRaw]}
-                  components={components as any}
-                >
-                  {getCleanResultForPreview(result)}
-                </ReactMarkdown>
+                {result ? (
+                  <ReactMarkdown
+                    rehypePlugins={[rehypeRaw]}
+                    components={components as any}
+                  >
+                    {getCleanResultForPreview(result)}
+                  </ReactMarkdown>
+                ) : (
+                  <p className="text-slate-400 text-center py-12 text-sm italic">
+                    Chưa có kết quả. Vui lòng bấm "TÍCH HỢP NĂNG LỰC SỐ".
+                  </p>
+                )}
               </div>
             </div>
           )}

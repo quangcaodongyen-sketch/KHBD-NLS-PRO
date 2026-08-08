@@ -64,22 +64,45 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                 </div>
 
                 <div className="p-6">
+                    {/* Banner Hướng dẫn lấy API Key đơn giản nhất */}
+                    <div className="mb-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 text-xs text-slate-700">
+                        <div className="flex items-center space-x-2 text-amber-900 font-bold mb-2 text-sm">
+                            <span>🔑 HƯỚNG DẪN LẤY API KEY MIỄN PHÍ (30 GIÂY)</span>
+                        </div>
+                        <ol className="space-y-1.5 list-decimal list-inside text-slate-800 font-medium">
+                            <li>Bấm vào nút đỏ <b>"Lấy API Key ngay"</b> bên dưới (mở tab Google AI Studio).</li>
+                            <li>Đăng nhập Gmail của bạn & bấm nút <b>"Create API key"</b>.</li>
+                            <li>Sao chép (Copy) mã <b>AIzaSy...</b> dán vào ô bên dưới và bấm <b>"Lưu cấu hình"</b>.</li>
+                        </ol>
+                        <div className="mt-3 pt-2 border-t border-amber-200/80 flex items-center justify-between">
+                            <a
+                                href="https://aistudio.google.com/app/apikey"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center space-x-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition-all shadow-md hover:shadow-red-500/30"
+                            >
+                                <span>👉 BẤM VÀO ĐÂY ĐỂ LẤY API KEY</span>
+                            </a>
+                            <span className="text-[11px] text-slate-500 italic">Google cấp miễn phí 100%</span>
+                        </div>
+                    </div>
+
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">
                                 Chọn AI Model ưu tiên
                             </label>
-                            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                            <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
                                 {AVAILABLE_MODELS.map((m) => (
                                     <label
                                         key={m.id}
-                                        className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
+                                        className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${
                                             model === m.id
                                                 ? 'border-blue-500 bg-blue-50/50 shadow-sm'
                                                 : 'border-slate-200 hover:border-slate-300 bg-white'
                                         }`}
                                     >
-                                        <div className="flex items-center space-x-3">
+                                        <div className="flex items-center space-x-2.5">
                                             <input
                                                 type="radio"
                                                 name="ai-model"
@@ -88,9 +111,9 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                                                 onChange={() => setModel(m.id)}
                                                 className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                                             />
-                                            <span className="text-sm font-medium text-slate-800">{m.name}</span>
+                                            <span className="text-xs font-semibold text-slate-800">{m.name}</span>
                                         </div>
-                                        <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ${
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                                             model === m.id ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'
                                         }`}>
                                             {m.badge}
@@ -101,16 +124,16 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center justify-between">
-                                <span>Gemini API Key</span>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between">
+                                <span>Dán API Key vào đây:</span>
                                 <span className="text-xs text-orange-600 font-bold">* Bắt buộc</span>
                             </label>
                             <input
                                 type="password"
                                 value={key}
                                 onChange={(e) => setKey(e.target.value)}
-                                placeholder="AIzaSy..."
-                                className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono text-sm"
+                                placeholder="Dán chuỗi API Key dạng AIzaSy... vào đây"
+                                className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono text-sm shadow-inner"
                                 autoFocus
                             />
                         </div>
@@ -122,15 +145,15 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                                 rel="noopener noreferrer"
                                 className="text-xs text-red-600 font-bold hover:underline flex items-center"
                             >
-                                🔗 Lấy API Key miễn phí tại đây
+                                🔗 https://aistudio.google.com/app/apikey
                             </a>
                             <button
                                 type="submit"
                                 disabled={!key.trim()}
-                                className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium transition-all shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                             >
                                 <Save size={18} />
-                                <span>Lưu cấu hình</span>
+                                <span>Lưu & Sử dụng</span>
                             </button>
                         </div>
                     </form>

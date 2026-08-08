@@ -11,9 +11,36 @@ import { useAuthStore } from '../store/authStore';
 import { MockDB } from '../services/mockDb';
 
 const AppMain: React.FC = () => {
-  // State for Form
-  const [subject, setSubject] = useState<Subject>(Subject.TOAN);
-  const [grade, setGrade] = useState<number>(7);
+  // State for Form - Mặc định Lớp 6, môn Tiếng Anh và tự động ghi nhớ theo người dùng
+  const [subject, setSubjectState] = useState<Subject>(() => {
+    const saved = localStorage.getItem('SAVED_SUBJECT');
+    if (saved && Object.values(Subject).includes(saved as Subject)) {
+      return saved as Subject;
+    }
+    return Subject.ANH; // Mặc định: Môn Tiếng Anh
+  });
+
+  const [grade, setGradeState] = useState<number>(() => {
+    const saved = localStorage.getItem('SAVED_GRADE');
+    if (saved) {
+      const parsed = parseInt(saved, 10);
+      if (!isNaN(parsed) && parsed >= 1 && parsed <= 12) {
+        return parsed;
+      }
+    }
+    return 6; // Mặc định: Lớp 6
+  });
+
+  // Hàm setter kèm ghi nhớ vào localStorage
+  const setSubject = (s: Subject) => {
+    setSubjectState(s);
+    localStorage.setItem('SAVED_SUBJECT', s);
+  };
+
+  const setGrade = (g: number) => {
+    setGradeState(g);
+    localStorage.setItem('SAVED_GRADE', g.toString());
+  };
 
   // Content States
   const [lessonContent, setLessonContent] = useState<string>('');

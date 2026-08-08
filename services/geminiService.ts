@@ -339,15 +339,20 @@ export const generateNLSLessonPlan = async (
   if (options.images && options.images.length > 0) {
     // Chỉ gửi tối đa 10 hình ảnh quan trọng nhất để tiết kiệm token
     options.images.slice(0, 10).forEach(img => {
-      contentsPayload.push({
-        inline_data: {
-          mime_type: img.mimeType,
-          data: img.base64
+      if (img.base64) {
+        const cleanBase64 = img.base64.replace(/^data:[^;]+;base64,/, '').trim();
+        if (cleanBase64) {
+          contentsPayload.push({
+            inlineData: {
+              mimeType: img.mimeType || "image/png",
+              data: cleanBase64
+            }
+          });
         }
-      });
+      }
     });
   }
-  contentsPayload.push(userPrompt);
+  contentsPayload.push({ text: userPrompt });
 
   // Fallback Logic: Try each model in sequence
   let lastError = null;
