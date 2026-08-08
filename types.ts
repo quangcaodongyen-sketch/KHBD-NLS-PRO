@@ -36,6 +36,7 @@ export interface ProcessingOptions {
   analyzeOnly: boolean;
   detailedReport: boolean;
   comparisonExport: boolean;
+  standardizeNd30?: boolean; // Tùy chọn chuẩn hóa thể thức VB theo NĐ30/2020/NĐ-CP
   apiKey?: string;
   selectedModel?: string;
   images?: { base64: string; mimeType: string }[];

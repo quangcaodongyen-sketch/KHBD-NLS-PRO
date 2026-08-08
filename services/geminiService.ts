@@ -317,6 +317,7 @@ export const generateNLSLessonPlan = async (
     YÊU CẦU XỬ LÝ NỘI DUNG:
     ${options.analyzeOnly ? "- Chỉ phân tích, không chỉnh sửa chi tiết." : "- Chỉnh sửa giáo án và TÍCH HỢP NĂNG LỰC SỐ vào các hoạt động dạy học."}
     ${options.detailedReport ? "- Kèm theo bảng giải thích chi tiết mã năng lực đã chọn ở cuối bài." : ""}
+    ${options.standardizeNd30 ? "- CHUẨN HÓA THỂ THỨC VĂN BẢN THEO NGHỊ ĐỊNH 30/2020/NĐ-CP: Áp dụng chuẩn thể thức văn bản hành chính Việt Nam (Font Times New Roman, Tiêu đề bài dạy IN HOA ĐẬM căn giữa, các mục I, II, III... IN HOA ĐẬM, các tiểu mục 1, 2, 3... in thường đậm, lùi đầu dòng 1.27cm, căn đều 2 bên)." : ""}
     
     YÊU CẦU VỀ ĐỊNH DẠNG (BẮT BUỘC):
     1. GIỮ NGUYÊN ĐỊNH DẠNG GỐC: Bạn phải giữ nguyên các đoạn in đậm (**text**), in nghiêng (*text*) của văn bản gốc. Không được làm mất định dạng này.

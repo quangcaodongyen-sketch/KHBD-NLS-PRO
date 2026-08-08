@@ -177,16 +177,65 @@ export async function parseDocxWithMath(arrayBuffer: ArrayBuffer): Promise<DocxP
             mathNode.parentNode?.replaceChild(textNode, mathNode);
           }
         });
+      }
 
-        // Trích xuất text từ XML đã được chèn LaTeX
+        // Trích xuất văn bản + chuyển đổi tất cả các bảng Word <w:tbl> thành Markdown Table
         let parsedXmlText = '';
-        const paragraphs = xmlDoc.getElementsByTagNameNS('*', 'p');
-        Array.from(paragraphs).forEach((p) => {
-          const pText = p.textContent || '';
-          if (pText.trim()) {
-            parsedXmlText += pText.trim() + '\n';
+        const bodyNode = xmlDoc.getElementsByTagNameNS('*', 'body')[0];
+
+        const parseXmlNode = (node: Element) => {
+          const localName = node.localName || node.tagName?.split(':').pop();
+
+          if (localName === 'p') {
+            const pText = node.textContent || '';
+            if (pText.trim()) {
+              parsedXmlText += pText.trim() + '\n\n';
+            }
+          } else if (localName === 'tbl') {
+            // Chuyển đổi bảng Word <w:tbl> sang Markdown Table | ... |
+            const trNodes = node.getElementsByTagNameNS('*', 'tr');
+            const tableRows: string[][] = [];
+
+            Array.from(trNodes).forEach((tr) => {
+              const tcNodes = (tr as Element).getElementsByTagNameNS('*', 'tc');
+              const rowCells: string[] = [];
+              Array.from(tcNodes).forEach((tc) => {
+                const cellText = (tc.textContent || '').replace(/\s+/g, ' ').trim();
+                rowCells.push(cellText || ' ');
+              });
+              if (rowCells.length > 0) {
+                tableRows.push(rowCells);
+              }
+            });
+
+            if (tableRows.length > 0) {
+              const maxCols = Math.max(...tableRows.map(r => r.length));
+              // Chuẩn hóa số cột
+              tableRows.forEach(r => {
+                while (r.length < maxCols) r.push(' ');
+              });
+
+              // Tạo hàng tiêu đề
+              const headerRow = tableRows[0];
+              parsedXmlText += '\n| ' + headerRow.join(' | ') + ' |\n';
+              parsedXmlText += '| ' + headerRow.map(() => '---').join(' | ') + ' |\n';
+
+              // Tạo các hàng dữ liệu
+              for (let r = 1; r < tableRows.length; r++) {
+                parsedXmlText += '| ' + tableRows[r].join(' | ') + ' |\n';
+              }
+              parsedXmlText += '\n';
+            }
           }
-        });
+        };
+
+        if (bodyNode) {
+          Array.from(bodyNode.childNodes).forEach((child) => {
+            if (child.nodeType === Node.ELEMENT_NODE) {
+              parseXmlNode(child as Element);
+            }
+          });
+        }
 
         if (parsedXmlText.trim()) {
           return {

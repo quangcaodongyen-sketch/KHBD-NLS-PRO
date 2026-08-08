@@ -347,26 +347,25 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
     return spacingMatch ? spacingMatch[0] : '';
   };
 
-  const buildNlsRPr = (sourceParagraphXml: string): string => {
-    const fontSize = extractFontSizeFromParagraph(sourceParagraphXml);
+  const buildNlsRPr = (_sourceParagraphXml: string = ''): string => {
     return [
       '<w:rPr>',
       '<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>',
       '<w:b w:val="0"/>',
       '<w:bCs w:val="0"/>',
-      '<w:i w:val="0"/>',
-      '<w:iCs w:val="0"/>',
-      '<w:color w:val="FF0000"/>',
-      `<w:sz w:val="${fontSize}"/>`,
-      `<w:szCs w:val="${fontSize}"/>`,
+      '<w:i w:val="1"/>', // In nghiêng
+      '<w:iCs w:val="1"/>',
+      '<w:color w:val="FF0000"/>', // Màu đỏ
+      '<w:sz w:val="26"/>', // Cỡ 13pt (26 half-points)
+      '<w:szCs w:val="26"/>',
       '</w:rPr>',
     ].join('');
   };
 
-  const buildNlsPPr = (sourceParagraphXml: string): string => {
+  const buildNlsPPr = (sourceParagraphXml: string = ''): string => {
     const spacing = extractSpacingFromParagraph(sourceParagraphXml);
-    const jc = '<w:jc w:val="both"/>';
-    return `<w:pPr><w:ind w:firstLine="720"/>${spacing}${jc}</w:pPr>`;
+    const jc = '<w:jc w:val="both"/>'; // Căn đều 2 bên
+    return `<w:pPr><w:ind w:firstLine="720"/>${spacing}${jc}</w:pPr>`; // Lùi lề 1.27cm (720 twips)
   };
 
   const convertMarkdownToWordXml = (markdown: string, sourceParagraphXml: string = ''): string => {
@@ -407,21 +406,37 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
     return xml;
   };
 
+  const extractPlainTextFromXmlParagraph = (pXml: string): string => {
+    const tMatches = pXml.match(/<w:t[^>]*>([\s\S]*?)<\/w:t>/gi) || [];
+    return tMatches
+      .map(t => t.replace(/<w:t[^>]*>([\s\S]*?)<\/w:t>/i, '$1'))
+      .join('')
+      .trim();
+  };
+
   const findAndInsertAfter = (
     xml: string,
     searchPatterns: string[],
     nlsMarkdown: string
   ): { result: string; inserted: boolean } => {
+    const pRegex = /<w:p(?:\s+[^>]*)?>[\s\S]*?<\/w:p>/g;
+    let match: RegExpExecArray | null;
+
     for (const pattern of searchPatterns) {
-      const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const cleanPattern = pattern.trim().toLowerCase();
+      if (!cleanPattern) continue;
 
-      const regex = new RegExp(`(<w:p[^>]*>(?:(?!<w:p[^>]*>)[\\s\\S])*?${escapedPattern}(?:(?!<w:p[^>]*>)[\\s\\S])*?</w:p>)`, 'i');
+      pRegex.lastIndex = 0;
+      while ((match = pRegex.exec(xml)) !== null) {
+        const fullPXml = match[0];
+        const pPlainText = extractPlainTextFromXmlParagraph(fullPXml).toLowerCase();
 
-      const match = xml.match(regex);
-      if (match) {
-        const contentToInsert = convertMarkdownToWordXml(nlsMarkdown, match[0]);
-        const newXml = xml.replace(match[0], match[0] + contentToInsert);
-        return { result: newXml, inserted: true };
+        if (pPlainText.includes(cleanPattern)) {
+          const contentToInsert = convertMarkdownToWordXml(nlsMarkdown, fullPXml);
+          const insertIndex = match.index + fullPXml.length;
+          const newXml = xml.slice(0, insertIndex) + contentToInsert + xml.slice(insertIndex);
+          return { result: newXml, inserted: true };
+        }
       }
     }
 
@@ -545,7 +560,29 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
     }
 
     const doc = new Document({
-      sections: [{ properties: {}, children: children }],
+      styles: {
+        default: {
+          document: {
+            run: {
+              font: "Times New Roman",
+              size: 27, // 13.5pt
+            },
+          },
+        },
+      },
+      sections: [{
+        properties: {
+          page: {
+            margin: {
+              top: 1134, // 2cm
+              bottom: 1134, // 2cm
+              left: 1701, // 3cm
+              right: 1134, // 2cm
+            },
+          },
+        },
+        children: children,
+      }],
     });
 
     return await Packer.toBlob(doc);
@@ -605,7 +642,19 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
 
   const components = {
     red: ({ children }: { children: React.ReactNode }) => (
-      <span style={{ color: '#FF0000', fontFamily: "'Times New Roman', Times, serif", fontWeight: 400 }}>{children}</span>
+      <span style={{
+        color: '#FF0000',
+        fontFamily: "'Times New Roman', Times, serif",
+        fontSize: '13pt',
+        fontStyle: 'italic',
+        display: 'block',
+        textIndent: '1.27cm',
+        textAlign: 'justify',
+        marginTop: '0.2rem',
+        marginBottom: '0.2rem'
+      }}>
+        {children}
+      </span>
     ),
     p: ({ children }: { children: React.ReactNode }) => (
       <p style={{

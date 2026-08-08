@@ -10,6 +10,47 @@ import ApiKeyModal from '../components/ApiKeyModal';
 import { useAuthStore } from '../store/authStore';
 import { MockDB } from '../services/mockDb';
 
+// Phát âm thanh tiếng chuông "Dinh!" vui tai khi tích hợp NLS hoàn tất
+const playSuccessDing = () => {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(1046.5, ctx.currentTime); // Âm Nốt Đố (C6)
+
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(1318.5, ctx.currentTime); // Âm Nốt Mi (E6)
+
+    const now = ctx.currentTime;
+
+    gain1.gain.setValueAtTime(0.3, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+
+    gain2.gain.setValueAtTime(0.2, now);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+
+    osc1.start(now);
+    osc2.start(now);
+
+    osc1.stop(now + 1.2);
+    osc2.stop(now + 0.8);
+  } catch (e) {
+    console.warn("Lỗi phát âm thanh thông báo:", e);
+  }
+};
+
 const AppMain: React.FC = () => {
   // State for Form - Mặc định Lớp 6, môn Tiếng Anh và tự động ghi nhớ theo người dùng
   const [subject, setSubjectState] = useState<Subject>(() => {
@@ -48,6 +89,7 @@ const AppMain: React.FC = () => {
   const [extractedImages, setExtractedImages] = useState<{ base64: string; mimeType: string }[]>([]);
 
   // State for Options
+  const [standardizeNd30, setStandardizeNd30] = useState(true);
   const [analyzeOnly, setAnalyzeOnly] = useState(false);
   const [detailedReport, setDetailedReport] = useState(false);
 
@@ -117,6 +159,7 @@ const AppMain: React.FC = () => {
           analyzeOnly,
           detailedReport,
           comparisonExport: false,
+          standardizeNd30,
           apiKey,
           selectedModel,
           images: extractedImages
@@ -128,6 +171,7 @@ const AppMain: React.FC = () => {
       }
 
       setResult(generatedText);
+      playSuccessDing();
       if (user) {
         MockDB.addLog(user.id, 'generate_nls', `Đã xử lý giáo án ${subject} lớp ${grade}`);
       }
@@ -147,155 +191,178 @@ const AppMain: React.FC = () => {
     <div className="min-h-screen bg-slate-50 font-sans pb-12">
       <Header onOpenSettings={() => setShowApiKeyModal(true)} apiKeySet={!!apiKey} />
 
-      <main className="max-w-6xl mx-auto px-4 md:px-6 mt-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <main className="w-full px-2 md:px-4 mt-2">
+        <div className="flex flex-col lg:flex-row gap-3 items-start">
+          
+          {/* CỘT BÊN TRÁI: DANH MỤC CẤU HÌNH (Width ~280px) */}
+          <div className="w-full lg:w-72 shrink-0 bg-white p-3.5 rounded-2xl shadow-sm border border-blue-200 space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <span className="font-extrabold text-xs uppercase tracking-wider text-blue-950 flex items-center">
+                <Settings2 size={15} className="mr-1.5 text-blue-600" />
+                Danh mục cấu hình
+              </span>
+              <span className="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full">
+                Bước 1 & 2
+              </span>
+            </div>
 
-          {/* Left Column: Inputs */}
-          <div className="lg:col-span-2 space-y-6">
+            {/* Môn học & Khối lớp */}
             <LessonForm
               subject={subject} setSubject={setSubject}
               grade={grade} setGrade={setGrade}
             />
 
-            <ContentInput
-              lessonContent={lessonContent}
-              setLessonContent={setLessonContent}
-              distributionContent={distributionContent}
-              setDistributionContent={setDistributionContent}
-              onOriginalDocxLoaded={setOriginalDocx}
-              onImagesExtracted={setExtractedImages}
-            />
-
-            {/* Options Panel */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-100">
-              <div className="flex items-center mb-4">
-                <Settings2 className="text-blue-600 mr-2" size={20} />
-                <h3 className="font-bold text-blue-950">Tùy chọn nâng cao</h3>
-              </div>
-              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-6">
-                <label className="flex items-center space-x-2.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={analyzeOnly}
-                    onChange={(e) => setAnalyzeOnly(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
-                  />
-                  <span className="text-sm font-medium text-slate-700">Chỉ phân tích, không chỉnh sửa</span>
-                </label>
-                <label className="flex items-center space-x-2.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={detailedReport}
-                    onChange={(e) => setDetailedReport(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
-                  />
-                  <span className="text-sm font-medium text-slate-700">Kèm bảng giải thích mã NLS chi tiết</span>
-                </label>
-              </div>
+            {/* Upload Files */}
+            <div>
+              <label className="block text-[11px] font-bold text-slate-600 mb-1">Tài liệu bài dạy đầu vào</label>
+              <ContentInput
+                lessonContent={lessonContent}
+                setLessonContent={setLessonContent}
+                distributionContent={distributionContent}
+                setDistributionContent={setDistributionContent}
+                onOriginalDocxLoaded={setOriginalDocx}
+                onImagesExtracted={setExtractedImages}
+              />
             </div>
 
-            {/* API Key Config Banner */}
-            <div className="flex justify-between items-center bg-blue-50/60 p-4 rounded-xl border border-blue-100">
-              <div className="flex items-center space-x-2">
-                <span className="text-xs text-slate-600 font-medium">Model hiện tại:</span>
-                <span className="text-xs font-bold text-blue-700 bg-blue-100/80 px-2.5 py-1 rounded-md">
-                  {selectedModel}
-                </span>
-              </div>
+            {/* Tùy chọn nâng cao */}
+            <div className="pt-2 border-t border-slate-100 space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-600 mb-1">Tùy chọn bổ sung</label>
+              <label className="flex items-center space-x-2 cursor-pointer text-xs text-blue-950 font-bold bg-blue-50/80 p-2 rounded-xl border border-blue-200 shadow-sm">
+                <input
+                  type="checkbox"
+                  checked={standardizeNd30}
+                  onChange={(e) => setStandardizeNd30(e.target.checked)}
+                  className="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                />
+                <span>📜 Chuẩn hóa thể thức VB (NĐ30/2020/NĐ-CP)</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer text-xs text-slate-700 font-medium bg-slate-50 p-2 rounded-xl border border-slate-200">
+                <input
+                  type="checkbox"
+                  checked={analyzeOnly}
+                  onChange={(e) => setAnalyzeOnly(e.target.checked)}
+                  className="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                />
+                <span>Chỉ phân tích, không chỉnh sửa</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer text-xs text-slate-700 font-medium bg-slate-50 p-2 rounded-xl border border-slate-200">
+                <input
+                  type="checkbox"
+                  checked={detailedReport}
+                  onChange={(e) => setDetailedReport(e.target.checked)}
+                  className="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                />
+                <span>Kèm bảng giải thích mã NLS</span>
+              </label>
+            </div>
+
+            {/* AI Model indicator & Change Key */}
+            <div className="flex items-center justify-between bg-blue-50/70 p-2 rounded-xl border border-blue-200 text-xs">
+              <span className="text-[11px] font-bold text-blue-900 truncate max-w-[120px]">{selectedModel}</span>
               <button
                 onClick={() => setShowApiKeyModal(true)}
-                className="text-xs text-blue-700 hover:text-blue-900 font-bold flex items-center space-x-1.5 bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm"
+                className="text-[11px] text-red-600 hover:text-red-800 font-bold flex items-center space-x-1 underline"
               >
-                <Key size={14} className="text-amber-500" />
-                <span>Đổi Model & API Key</span>
+                <Key size={12} className="text-amber-500" />
+                <span>Đổi Key</span>
               </button>
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3.5 rounded-xl flex items-start space-x-2 text-sm font-medium">
-                <span className="text-red-500 font-bold">⚠️ Lỗi:</span>
+              <div className="bg-red-50 border border-red-200 text-red-700 p-2 rounded-xl text-xs font-medium">
+                <span className="text-red-500 font-bold">⚠️ Lỗi: </span>
                 <span>{error}</span>
               </div>
             )}
 
+            {/* NÚT THỰC THI CHÍNH */}
             <button
               onClick={handleProcess}
               disabled={loading}
-              className={`w-full py-4 rounded-xl shadow-lg flex items-center justify-center space-x-2 text-white font-extrabold text-lg transition-all transform active:scale-95 ${loading
-                ? 'bg-slate-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 hover:from-blue-700 hover:to-indigo-900 hover:shadow-blue-500/25'
-                }`}
+              className={`w-full py-3 rounded-xl shadow-lg flex items-center justify-center space-x-1.5 text-white font-extrabold text-xs md:text-sm transition-all transform active:scale-95 ${
+                loading
+                  ? 'bg-slate-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 hover:from-blue-700 hover:to-indigo-900 hover:shadow-blue-500/25'
+              }`}
             >
               {loading ? (
-                <div className="flex items-center space-x-2">
-                  <span className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></span>
-                  <span>ĐANG PHÂN TÍCH & TÍCH HỢP NĂNG LỰC SỐ...</span>
+                <div className="flex items-center space-x-1.5">
+                  <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+                  <span>ĐANG TÍCH HỢP...</span>
                 </div>
               ) : (
                 <>
-                  <Sparkles size={22} className="text-amber-300 animate-pulse" />
-                  <span>BẮT ĐẦU SOẠN GIÁO ÁN NĂNG LỰC SỐ</span>
+                  <Sparkles size={18} className="text-amber-300 animate-pulse" />
+                  <span>TÍCH HỢP NĂNG LỰC SỐ</span>
                 </>
               )}
             </button>
           </div>
 
-          {/* Right Column: Info */}
-          <div className="hidden lg:block space-y-6">
-            <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-950 text-white p-6 rounded-2xl shadow-md border border-blue-800">
-              <h3 className="font-bold text-lg mb-4 flex items-center">
-                <span className="bg-blue-600 p-1 rounded-lg mr-2 text-xs">GUIDE</span>
-                Hướng dẫn thực hiện
+          {/* CỘT GIỮA: 2 CỬA SỔ SO SÁNH GIÁO ÁN (Flex-1) */}
+          <div className="flex-1 w-full min-w-0">
+            <ResultDisplay
+              result={result}
+              loading={loading}
+              originalDocx={originalDocx}
+              originalContent={lessonContent}
+            />
+          </div>
+
+          {/* CỘT BÊN PHẢI: HƯỚNG DẪN THỰC HIỆN & 6 MIỀN NLS (Width ~240px) */}
+          <div className="w-full lg:w-64 shrink-0 space-y-3 hidden xl:block">
+            {/* Thẻ Hướng dẫn */}
+            <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-950 text-white p-4 rounded-2xl shadow-md border border-blue-800 text-xs">
+              <h3 className="font-bold text-sm mb-3 flex items-center justify-between border-b border-blue-700/60 pb-2">
+                <span className="flex items-center">
+                  <span className="bg-blue-600 px-1.5 py-0.5 rounded text-[10px] font-bold mr-1.5">GUIDE</span>
+                  Hướng dẫn
+                </span>
               </h3>
-              <ul className="space-y-3.5 text-blue-100 text-sm">
+              <ol className="space-y-2.5 text-blue-100 font-medium">
                 <li className="flex items-start">
-                  <span className="bg-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 font-bold">1</span>
-                  <span>Chọn <b>Môn học</b> và <b>Khối lớp</b> giảng dạy.</span>
+                  <span className="bg-blue-600 rounded-full w-4 h-4 flex items-center justify-center text-[10px] mr-2 mt-0.5 font-bold shrink-0">1</span>
+                  <span>Chọn <b>Môn học</b> & <b>Khối lớp</b> ở danh mục bên trái.</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="bg-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 font-bold">2</span>
-                  <span><b>Tải lên File Giáo án (.docx/.pdf):</b> Hệ thống tự động đọc công thức Toán học (OMML, MathType) và bảo toàn nội dung.</span>
+                  <span className="bg-blue-600 rounded-full w-4 h-4 flex items-center justify-center text-[10px] mr-2 mt-0.5 font-bold shrink-0">2</span>
+                  <span>Bấm <b>Chọn File Giáo án</b> (.docx/.pdf) cần tích hợp NLS.</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="bg-blue-500/40 rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 font-bold">3</span>
-                  <span><i>Tải file PPCT (tùy chọn):</i> Giúp AI trích xuất nguyên văn YCCĐ NLS của trường.</span>
+                  <span className="bg-blue-500/40 rounded-full w-4 h-4 flex items-center justify-center text-[10px] mr-2 mt-0.5 font-bold shrink-0">3</span>
+                  <span>Nhấn <b>TÍCH HỢP NĂNG LỰC SỐ</b> để AI chèn chữ màu đỏ.</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="bg-amber-500/40 text-amber-200 rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 font-bold">4</span>
-                  <span>Nhấn <b>Tải về DOCX</b> để nhận file Word chèn màu đỏ nội dung NLS.</span>
+                  <span className="bg-amber-500/40 text-amber-200 rounded-full w-4 h-4 flex items-center justify-center text-[10px] mr-2 mt-0.5 font-bold shrink-0">4</span>
+                  <span>Bấm <b>TẢI FILE WORD (.DOCX)</b> ở góc trên cửa sổ kết quả.</span>
                 </li>
-              </ul>
+              </ol>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-100">
-              <h3 className="font-bold text-blue-950 mb-3 text-sm uppercase tracking-wider">6 Miền Năng lực số</h3>
-              <div className="space-y-2.5">
+            {/* Thẻ 6 Miền Năng lực số */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-blue-200 text-xs">
+              <h3 className="font-bold text-blue-950 mb-2 text-xs uppercase tracking-wider border-b border-slate-100 pb-1.5">
+                6 Miền Năng lực số
+              </h3>
+              <div className="space-y-1.5">
                 {[
-                  "1. Khai thác dữ liệu và thông tin",
-                  "2. Giao tiếp và Hợp tác",
+                  "1. Khai thác dữ liệu & thông tin",
+                  "2. Giao tiếp & Hợp tác",
                   "3. Sáng tạo nội dung số",
                   "4. An toàn số",
                   "5. Giải quyết vấn đề",
                   "6. Ứng dụng AI"
                 ].map((item, idx) => (
-                  <div key={idx} className="flex items-center text-xs font-medium text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2.5"></div>
-                    {item}
+                  <div key={idx} className="flex items-center text-[11px] font-semibold text-slate-700 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2 shrink-0"></div>
+                    <span>{item}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Result Section */}
-        <div className="mt-8">
-          <ResultDisplay
-            result={result}
-            loading={loading}
-            originalDocx={originalDocx}
-            originalContent={lessonContent}
-          />
         </div>
       </main>
 
