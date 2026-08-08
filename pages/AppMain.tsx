@@ -205,62 +205,7 @@ const AppMain: React.FC = () => {
               Khoá định dạng A4 • Bảo toàn XML Docx 100%
             </span>
           </div>
-
-          <button
-            onClick={() => setShowGuide(!showGuide)}
-            className="text-xs font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-xl transition-all border border-blue-200 flex items-center space-x-1"
-          >
-            <span>{showGuide ? 'Ẩn Hướng dẫn & 6 Miền NLS' : '📖 Xem Hướng dẫn & 6 Miền NLS'}</span>
-          </button>
         </div>
-
-        {/* Collapsible Guide Banner */}
-        {showGuide && (
-          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-3 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-4 rounded-2xl shadow-md border border-blue-800 text-xs animate-fadeIn">
-            <div>
-              <h3 className="font-bold text-sm mb-2 text-amber-300 flex items-center">
-                <span>📋 Quy trình thực hiện nhanh:</span>
-              </h3>
-              <ol className="space-y-1.5 text-blue-100 font-medium">
-                <li className="flex items-start">
-                  <span className="bg-blue-600 rounded-full w-4 h-4 flex items-center justify-center text-[10px] mr-2 mt-0.5 font-bold shrink-0">1</span>
-                  <span>Chọn <b>Môn học</b> & <b>Khối lớp</b> ở Bảng điều khiển.</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="bg-blue-600 rounded-full w-4 h-4 flex items-center justify-center text-[10px] mr-2 mt-0.5 font-bold shrink-0">2</span>
-                  <span>Tải lên file <b>Kế hoạch bài dạy (.docx/.pdf)</b> cần tích hợp NLS.</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="bg-blue-500 rounded-full w-4 h-4 flex items-center justify-center text-[10px] mr-2 mt-0.5 font-bold shrink-0">3</span>
-                  <span>Bấm nút các <b>Tùy chọn bổ sung</b> (Thẻ sáng viền màu lam).</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="bg-amber-500 text-slate-950 rounded-full w-4 h-4 flex items-center justify-center text-[10px] mr-2 mt-0.5 font-bold shrink-0">4</span>
-                  <span>Bấm <b>TÍCH HỢP NĂNG LỰC SỐ</b> và tải file Word về máy.</span>
-                </li>
-              </ol>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-sm mb-2 text-indigo-200">🌐 6 Miền Năng lực số chuẩn Việt Nam:</h3>
-              <div className="grid grid-cols-2 gap-1.5 text-[11px]">
-                {[
-                  "1. Khai thác dữ liệu & thông tin",
-                  "2. Giao tiếp & Hợp tác",
-                  "3. Sáng tạo nội dung số",
-                  "4. An toàn số",
-                  "5. Giải quyết vấn đề",
-                  "6. Ứng dụng AI"
-                ].map((item, idx) => (
-                  <div key={idx} className="bg-white/10 p-1.5 rounded-lg border border-white/10 flex items-center font-medium">
-                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5 shrink-0"></span>
-                    <span className="truncate">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Layout 2 cột chính Khoa học & Rộng rãi */}
         <div className="flex flex-col lg:flex-row gap-4 items-start">

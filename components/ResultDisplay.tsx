@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Download, CheckCircle, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
@@ -43,6 +43,26 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
   const [viewMode, setViewMode] = useState<'split' | 'single'>('split'); // Default to split side-by-side mode
   const [isGeneratingDoc, setIsGeneratingDoc] = useState(false);
   const { user } = useAuthStore();
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (loading) {
+      setProgress(0);
+      interval = setInterval(() => {
+        setProgress(p => {
+          if (p < 50) return p + Math.floor(Math.random() * 5) + 2;
+          if (p < 80) return p + Math.floor(Math.random() * 3) + 1;
+          if (p < 95) return p + 1;
+          if (p < 99) return p + 0.1;
+          return p;
+        });
+      }, 500);
+    } else {
+      setProgress(100);
+    }
+    return () => clearInterval(interval);
+  }, [loading]);
 
   // Parse tất cả các section NLS từ kết quả AI (supports both Vietnamese NLS_ and English DC_ markers)
   const parseAllNLSSections = (content: string): NLSSection[] => {
@@ -697,12 +717,24 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
   if (loading) {
     return (
       <div className="bg-white p-12 rounded-2xl shadow-sm border border-blue-100 flex flex-col items-center justify-center min-h-[320px]">
-        <div className="relative mb-6">
-          <div className="animate-spin rounded-full h-14 w-14 border-4 border-blue-200 border-t-blue-600"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <FileText size={20} className="text-blue-600 animate-pulse" />
+        <div className="relative mb-6 w-full max-w-md">
+          {/* Progress Bar Container */}
+          <div className="w-full bg-slate-100 rounded-full h-3 mb-2 overflow-hidden shadow-inner border border-slate-200">
+            {/* Progress Fill */}
+            <div 
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-300 ease-out relative"
+              style={{ width: `${Math.min(100, Math.max(2, progress))}%` }}
+            >
+              <div className="absolute inset-0 bg-white/20 animate-pulse rounded-full"></div>
+            </div>
+          </div>
+          
+          <div className="flex justify-between items-center text-xs font-bold text-blue-900 mb-6 px-1">
+            <span className="flex items-center space-x-1.5"><FileText size={14} className="text-blue-500" /><span>Tiến trình phân tích...</span></span>
+            <span className="text-indigo-600 font-extrabold text-sm">{Math.floor(progress)}%</span>
           </div>
         </div>
+        
         <h3 className="text-lg font-bold text-blue-950 animate-pulse">Đang phân tích & tích hợp Năng lực số...</h3>
         <p className="text-slate-500 mt-2 text-sm text-center max-w-md">
           Hệ thống đang tự động trích xuất các hoạt động, đối chiếu với Phân phối chương trình và tích hợp NLS...
