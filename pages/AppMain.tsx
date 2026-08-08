@@ -5,7 +5,7 @@ import ContentInput from '../components/ContentInput';
 import ResultDisplay from '../components/ResultDisplay';
 import { Subject, OriginalDocxFile } from '../types';
 import { generateNLSLessonPlan } from '../services/geminiService';
-import { Sparkles, Settings2, Key } from 'lucide-react';
+import { Sparkles, Settings2, Key, ChevronDown, ChevronUp } from 'lucide-react';
 import ApiKeyModal from '../components/ApiKeyModal';
 import { useAuthStore } from '../store/authStore';
 import { MockDB } from '../services/mockDb';
@@ -163,7 +163,8 @@ const AppMain: React.FC = () => {
           apiKey,
           selectedModel,
           images: extractedImages
-        }
+        },
+        (text) => setResult(text)
       );
 
       if (!generatedText || generatedText.trim().length === 0) {
@@ -188,20 +189,21 @@ const AppMain: React.FC = () => {
   };
 
   const [showGuide, setShowGuide] = useState<boolean>(false);
+  const [showSubjectGrade, setShowSubjectGrade] = useState<boolean>(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans pb-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-50 font-sans pb-12">
       <Header onOpenSettings={() => setShowApiKeyModal(true)} apiKeySet={!!apiKey} />
 
-      <main className="w-full px-3 md:px-6 mt-3 max-w-[1700px] mx-auto">
+      <main className="w-full px-3 md:px-6 mt-4 max-w-[1700px] mx-auto">
         {/* Top Bar: Quick Guide Toggle & Status */}
-        <div className="mb-3 flex items-center justify-between bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-slate-200 text-xs">
-          <div className="flex items-center space-x-2">
-            <span className="font-extrabold text-blue-900 flex items-center">
-              <Sparkles size={16} className="text-amber-500 mr-1.5" />
+        <div className="mb-4 flex items-center justify-between bg-white px-5 py-3 rounded-2xl shadow-md border border-slate-200 text-sm">
+          <div className="flex items-center space-x-3">
+            <span className="font-extrabold text-blue-900 flex items-center text-base">
+              <Sparkles size={20} className="text-amber-500 mr-2 drop-shadow" />
               Quy trình 4 Bước Tích hợp Năng lực số
             </span>
-            <span className="hidden sm:inline-block text-[11px] text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded-md">
+            <span className="hidden sm:inline-block text-xs md:text-sm text-slate-600 font-bold bg-slate-100 px-3 py-1 rounded-lg border border-slate-200 shadow-inner">
               Khoá định dạng A4 • Bảo toàn XML Docx 100%
             </span>
           </div>
@@ -210,29 +212,45 @@ const AppMain: React.FC = () => {
         {/* Layout 2 cột chính Khoa học & Rộng rãi */}
         <div className="flex flex-col lg:flex-row gap-4 items-start">
           
-          {/* CỘT BÊN TRÁI: BẢNG ĐIỀU KHIỂN NẮM RÕ 4 BƯỚC (Width ~320px) */}
-          <div className="w-full lg:w-80 shrink-0 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+          {/* CỘT BÊN TRÁI: BẢNG ĐIỀU KHIỂN NẮM RÕ 4 BƯỚC (Width ~360px) */}
+          <div className="w-full lg:w-[360px] shrink-0 bg-white p-5 rounded-3xl shadow-xl border border-slate-200 border-t-white space-y-5">
             
             {/* Header Control */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-              <span className="font-extrabold text-xs uppercase tracking-wider text-blue-950 flex items-center">
-                <Settings2 size={16} className="mr-1.5 text-blue-600" />
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <span className="font-extrabold text-sm uppercase tracking-wider text-blue-950 flex items-center">
+                <Settings2 size={20} className="mr-2 text-blue-600 drop-shadow-sm" />
                 Bảng điều khiển
               </span>
-              <span className="text-[10px] bg-blue-100 text-blue-800 font-extrabold px-2.5 py-0.5 rounded-full">
+              <span className="text-xs bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 font-extrabold px-3 py-1 rounded-full shadow-inner border border-blue-200">
                 Tích hợp NLS
               </span>
             </div>
 
             {/* BƯỚC 1: Môn học & Khối lớp */}
-            <div className="bg-slate-50/80 p-3 rounded-xl border border-slate-200 space-y-2">
-              <span className="text-[11px] font-extrabold text-blue-900 uppercase tracking-wider block border-b border-slate-200 pb-1">
-                Bước 1: Chọn Môn & Lớp
-              </span>
-              <LessonForm
-                subject={subject} setSubject={setSubject}
-                grade={grade} setGrade={setGrade}
-              />
+            <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-4 rounded-2xl border border-slate-200 space-y-3 shadow-inner">
+              <div 
+                className="flex items-center justify-between border-b border-slate-200 pb-2 cursor-pointer hover:bg-white -mx-2 px-2 rounded-lg transition-colors"
+                onClick={() => setShowSubjectGrade(!showSubjectGrade)}
+              >
+                <span className="text-sm font-extrabold text-blue-900 uppercase tracking-wider">
+                  Bước 1: Chọn Môn & Lớp
+                </span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs md:text-sm font-bold text-blue-700 bg-white border border-blue-200 px-3 py-1 rounded-lg shadow-sm">
+                    {subject} - Lớp {grade}
+                  </span>
+                  {showSubjectGrade ? <ChevronUp size={18} className="text-blue-600"/> : <ChevronDown size={18} className="text-blue-600"/>}
+                </div>
+              </div>
+              
+              {showSubjectGrade && (
+                <div className="pt-1">
+                  <LessonForm
+                    subject={subject} setSubject={setSubject}
+                    grade={grade} setGrade={setGrade}
+                  />
+                </div>
+              )}
             </div>
 
             {/* BƯỚC 2: Upload Tài liệu bài dạy */}

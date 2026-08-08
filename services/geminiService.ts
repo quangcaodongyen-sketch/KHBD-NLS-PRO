@@ -172,7 +172,8 @@ const DEFAULT_MODELS = [
 
 export const generateNLSLessonPlan = async (
   info: LessonInfo,
-  options: ProcessingOptions
+  options: ProcessingOptions,
+  onProgress?: (text: string) => void
 ): Promise<string> => {
 
   // Initialize inside function to avoid top-level execution issues
@@ -364,7 +365,7 @@ export const generateNLSLessonPlan = async (
     console.log(`Attempting generation with model: ${currentModelId}...`);
 
     try {
-      const response = await ai.models.generateContent({
+      const responseStream = await ai.models.generateContentStream({
         model: currentModelId,
         config: {
           systemInstruction: systemInstruction,
@@ -373,11 +374,20 @@ export const generateNLSLessonPlan = async (
         contents: contentsPayload,
       });
 
-      const text = response.text;
-      if (!text) {
+      let fullText = "";
+      for await (const chunk of responseStream) {
+        if (chunk.text) {
+          fullText += chunk.text;
+          if (onProgress) {
+            onProgress(fullText);
+          }
+        }
+      }
+
+      if (!fullText) {
         throw new Error("API trả về kết quả rỗng (Empty Response).");
       }
-      return text; // Success!
+      return fullText; // Success!
 
     } catch (error: any) {
       console.error(`Error with model ${currentModelId}:`, error);

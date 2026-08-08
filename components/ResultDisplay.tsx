@@ -21,7 +21,9 @@ import FileSaver from 'file-saver';
 import JSZip from 'jszip';
 import { OriginalDocxFile } from '../types';
 
+import { parseAllNLSSections } from '../services/geminiService';
 import { useAuthStore } from '../store/authStore';
+import remarkGfm from 'remark-gfm';
 import { MockDB } from '../services/mockDb';
 
 interface ResultDisplayProps {
@@ -68,8 +70,8 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
   const parseAllNLSSections = (content: string): NLSSection[] => {
     const sections: NLSSection[] = [];
 
-    // Regex để tìm tất cả các section: ===NLS_XXX=== hoặc ===DC_XXX=== ... ===END===
-    const sectionRegex = /===(NLS|DC)_([^=]+)===([\s\S]*?)===END===/g;
+    // Regex để tìm tất cả các section: ===NLS_XXX=== hoặc ===DC_XXX=== ... (cho phép khuyết ===END=== khi đang stream)
+    const sectionRegex = /===(NLS|DC)_([^=]+)===([\s\S]*?)(?:===END===|$)/g;
     let match;
 
     while ((match = sectionRegex.exec(content)) !== null) {
@@ -543,6 +545,11 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
 
     let documentXml = await documentXmlFile.async('string');
 
+    // Khóa độ rộng cột của tất cả các bảng (Table Layout: Fixed)
+    // Để khi chèn thêm chữ, cột không bị dãn ra (chỉ tự động thêm dòng)
+    documentXml = documentXml.replace(/<w:tblLayout[^>]*>/g, '');
+    documentXml = documentXml.replace(/<w:tblPr(?: [^>]+)?>/g, '$&<w:tblLayout w:type="fixed"/>');
+
     const sections = parseAllNLSSections(aiResult);
 
     let insertedCount = 0;
@@ -583,7 +590,9 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
 
     return await zip.generateAsync({
       type: 'blob',
-      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 }
     });
   };
 
@@ -1002,6 +1011,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
                 <div className="p-6 md:p-8 overflow-y-auto flex-1 bg-white scrollbar-thin text-slate-900" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
                   {originalContent ? (
                     <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}
                       components={components as any}
                     >
@@ -1033,11 +1043,18 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
                 <div className="p-6 md:p-8 overflow-y-auto flex-1 bg-white scrollbar-thin text-slate-900 border-l-4 border-l-blue-600" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
                   {result ? (
                     <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}
                       components={components as any}
                     >
                       {generateFullIntegratedPreview(originalContent, result)}
                     </ReactMarkdown>
+                  ) : loading ? (
+                    <div className="text-slate-400 text-center py-20 flex flex-col items-center justify-center">
+                      <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent mb-4 shadow-sm"></div>
+                      <p className="font-extrabold text-lg text-blue-600 animate-pulse">Trí tuệ nhân tạo đang phân tích...</p>
+                      <p className="text-sm mt-2 text-slate-500 font-medium">Giáo án sẽ xuất hiện theo thời gian thực giống như đang gõ phím</p>
+                    </div>
                   ) : (
                     <div className="text-slate-400 text-center py-20 flex flex-col items-center justify-center">
                       <CheckCircle size={40} className="mb-3 opacity-30 text-blue-400" />
@@ -1063,11 +1080,18 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
               <div className="p-8 md:p-12 bg-white text-slate-900 shadow-inner" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
                 {result ? (
                   <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeRaw]}
                     components={components as any}
                   >
                     {generateFullIntegratedPreview(originalContent, result)}
                   </ReactMarkdown>
+                ) : loading ? (
+                  <div className="text-slate-400 text-center py-16 flex flex-col items-center justify-center">
+                    <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent mb-4 shadow-sm"></div>
+                    <p className="font-extrabold text-lg text-blue-600 animate-pulse">Trí tuệ nhân tạo đang phân tích...</p>
+                    <p className="text-sm mt-2 text-slate-500 font-medium">Giáo án sẽ xuất hiện theo thời gian thực giống như đang gõ phím</p>
+                  </div>
                 ) : (
                   <p className="text-slate-400 text-center py-12 text-sm italic">
                     Chưa có kết quả. Vui lòng bấm "TÍCH HỢP NĂNG LỰC SỐ".

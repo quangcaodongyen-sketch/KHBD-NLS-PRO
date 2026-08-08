@@ -199,26 +199,26 @@ const ContentInput: React.FC<ContentInputProps> = ({
         type="button"
         onClick={() => lessonInputRef.current?.click()}
         disabled={processingLesson}
-        className={`w-full py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-between transition-all shadow-sm ${
+        className={`w-full py-3 px-4 rounded-xl border text-sm md:text-base font-bold flex items-center justify-between transition-all ${
           lessonContent
-            ? 'bg-green-50 border-green-300 text-green-800'
-            : 'bg-blue-50/70 border-blue-200 text-blue-900 hover:bg-blue-100/70'
+            ? 'bg-gradient-to-b from-green-50 to-green-100 border-green-400 text-green-800 shadow-[0_4px_0_0_#86efac] active:translate-y-1 active:shadow-none'
+            : 'bg-gradient-to-b from-white to-blue-50 hover:from-blue-50 hover:to-blue-100 border-blue-300 text-blue-900 shadow-[0_4px_0_0_#93c5fd] active:translate-y-1 active:shadow-none hover:-translate-y-0.5'
         }`}
         title="Tải lên Kế hoạch bài dạy (.docx hoặc .pdf)"
       >
         <div className="flex items-center space-x-2 truncate">
           {processingLesson ? (
-            <Loader2 className="animate-spin text-blue-600 shrink-0" size={15} />
+            <Loader2 className="animate-spin text-blue-600 shrink-0 drop-shadow" size={20} />
           ) : lessonContent ? (
-            <CheckCircle className="text-green-600 shrink-0" size={15} />
+            <CheckCircle className="text-green-600 shrink-0 drop-shadow" size={20} />
           ) : (
-            <FileText className="text-blue-600 shrink-0" size={15} />
+            <FileText className="text-blue-600 shrink-0 drop-shadow" size={20} />
           )}
           <span className="truncate font-bold">
-            {lessonFileName ? lessonFileName : '📁 Chọn File Giáo án'}
+            {lessonFileName ? lessonFileName : '📁 Tải KHBD (Giáo án) lên (bắt buộc)'}
           </span>
         </div>
-        <span className="text-[10px] bg-white px-1.5 py-0.5 rounded border border-blue-200 shrink-0">.docx</span>
+        <span className="text-xs font-bold bg-white px-2 py-1 rounded-lg border border-blue-200 shrink-0 shadow-inner">.docx</span>
       </button>
 
       {/* Nút Upload PPCT */}
@@ -226,26 +226,26 @@ const ContentInput: React.FC<ContentInputProps> = ({
         type="button"
         onClick={() => distInputRef.current?.click()}
         disabled={processingDist}
-        className={`w-full py-2 px-3 rounded-xl border text-xs font-medium flex items-center justify-between transition-all shadow-sm ${
+        className={`w-full py-3 px-4 rounded-xl border text-sm md:text-base font-bold flex items-center justify-between transition-all ${
           distributionContent
-            ? 'bg-green-50 border-green-300 text-green-800'
-            : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+            ? 'bg-gradient-to-b from-green-50 to-green-100 border-green-400 text-green-800 shadow-[0_4px_0_0_#86efac] active:translate-y-1 active:shadow-none'
+            : 'bg-gradient-to-b from-white to-slate-50 hover:from-slate-50 hover:to-slate-100 border-slate-300 text-slate-700 shadow-[0_4px_0_0_#cbd5e1] active:translate-y-1 active:shadow-none hover:-translate-y-0.5'
         }`}
-        title="Tải lên Phân phối chương trình (Không bắt buộc)"
+        title="Tải lên Phụ lục NLS (Không bắt buộc)"
       >
         <div className="flex items-center space-x-2 truncate">
           {processingDist ? (
-            <Loader2 className="animate-spin text-blue-600 shrink-0" size={15} />
+            <Loader2 className="animate-spin text-blue-600 shrink-0 drop-shadow" size={20} />
           ) : distributionContent ? (
-            <CheckCircle className="text-green-600 shrink-0" size={15} />
+            <CheckCircle className="text-green-600 shrink-0 drop-shadow" size={20} />
           ) : (
-            <FileUp className="text-slate-500 shrink-0" size={15} />
+            <FileUp className="text-slate-500 shrink-0 drop-shadow" size={20} />
           )}
           <span className="truncate font-semibold">
-            {distFileName ? distFileName : '📄 Chọn PPCT (Tùy chọn)'}
+            {distFileName ? distFileName : '📄 Tải Phụ lục NLS lên (Không bắt buộc)'}
           </span>
         </div>
-        <span className="text-[10px] bg-white px-1.5 py-0.5 rounded border border-slate-200 shrink-0">Tùy chọn</span>
+        <span className="text-xs font-bold bg-white px-2 py-1 rounded-lg border border-slate-200 shrink-0 shadow-inner">Tùy chọn</span>
       </button>
 
       {mathStatus && (
