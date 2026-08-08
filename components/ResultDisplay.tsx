@@ -697,6 +697,47 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
       .replace(/\n{3,}/g, '\n\n');
   };
 
+  // Tạo nội dung giáo án hoàn chỉnh từ đầu đến cuối tích hợp NLS màu đỏ
+  const generateFullIntegratedPreview = (originalText: string = '', resultText: string = ''): string => {
+    if (!resultText) return originalText;
+
+    const parsedSections = parseAllNLSSections(resultText);
+
+    // Nếu không có markers ===...===, trả về nội dung AI trả về
+    if (parsedSections.length === 0) {
+      return getCleanResultForPreview(resultText);
+    }
+
+    // Nếu có giáo án gốc, chèn các section NLS vào đúng vị trí trong giáo án gốc
+    if (originalText && originalText.trim().length > 0) {
+      let fullText = originalText;
+
+      for (const section of parsedSections) {
+        const cleanContent = section.content.replace(/===[^=]+===/g, '').trim();
+        if (!cleanContent) continue;
+
+        // Đảm bảo bọc thẻ <red>...</red> cho nội dung NLS
+        const redContent = cleanContent.includes('<red>')
+          ? cleanContent
+          : `<red>\n\n- ${cleanContent}\n\n</red>`;
+
+        for (const pattern of section.searchPatterns) {
+          const escaped = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(`(${escaped}[^\\n]*)`, 'i');
+
+          if (regex.test(fullText)) {
+            fullText = fullText.replace(regex, `$1\n\n${redContent}`);
+            break;
+          }
+        }
+      }
+
+      return fullText;
+    }
+
+    return getCleanResultForPreview(resultText);
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-blue-200 overflow-hidden transition-all duration-300">
       {/* Action Header Banner */}
@@ -708,15 +749,15 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
           <div>
             <div className="flex items-center justify-center md:justify-start space-x-2">
               <span className="bg-green-500/30 text-green-300 border border-green-400/40 text-xs px-2.5 py-0.5 rounded-full font-bold">
-                {result ? '✓ ĐÃ PHÂN TÍCH' : '📋 GIAO DIỆN SO SÁNH'}
+                {result ? '✓ ĐÃ TÍCH HỢP NLS' : '📋 GIAO DIỆN SO SÁNH'}
               </span>
-              <h2 className="text-lg font-bold tracking-tight text-white">So sánh Giáo án Gốc & Tích hợp NLS</h2>
+              <h2 className="text-lg font-bold tracking-tight text-white">So sánh Giáo án Gốc & Giáo án NLS</h2>
             </div>
             <p className="text-blue-100 text-xs mt-0.5">
               {result ? (
-                <>Đã chèn NLS vào <strong>{sections.length} mục</strong> • Nội dung bổ sung hiển thị <span className="text-red-300 font-bold">chữ màu đỏ</span></>
+                <>Đã chèn NLS màu đỏ vào <strong>{sections.length} mục</strong> trong toàn bộ giáo án</>
               ) : (
-                'Quan sát trực quan giáo án ban đầu và giáo án tự động tích hợp Năng lực số'
+                'Hiển thị toàn bộ giáo án từ đầu đến cuối kèm phần tích hợp NLS màu đỏ'
               )}
             </p>
           </div>
@@ -808,12 +849,12 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
                 {/* Giả lập trang giấy A4 Word */}
                 <div className="p-6 md:p-8 overflow-y-auto flex-1 bg-white scrollbar-thin text-slate-900" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
                   {originalContent ? (
-                    <div
-                      className="whitespace-pre-wrap text-justify leading-relaxed"
-                      style={{ fontSize: '13.5pt', lineHeight: '1.5' }}
+                    <ReactMarkdown
+                      rehypePlugins={[rehypeRaw]}
+                      components={components as any}
                     >
                       {originalContent}
-                    </div>
+                    </ReactMarkdown>
                   ) : (
                     <div className="text-slate-400 text-center py-20 flex flex-col items-center justify-center">
                       <FileText size={40} className="mb-3 opacity-40" />
@@ -829,7 +870,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
                 <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-4 py-3 flex items-center justify-between border-b border-blue-900 shrink-0">
                   <div className="flex items-center space-x-2">
                     <CheckCircle size={16} className="text-green-300" />
-                    <h3 className="font-bold text-xs uppercase tracking-wider text-white">2. Giáo án NLS</h3>
+                    <h3 className="font-bold text-xs uppercase tracking-wider text-white">2. Giáo án NLS (Toàn văn từ đầu đến cuối)</h3>
                   </div>
                   <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-full font-bold">
                     NLS màu đỏ
@@ -843,7 +884,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
                       rehypePlugins={[rehypeRaw]}
                       components={components as any}
                     >
-                      {getCleanResultForPreview(result)}
+                      {generateFullIntegratedPreview(originalContent, result)}
                     </ReactMarkdown>
                   ) : (
                     <div className="text-slate-400 text-center py-20 flex flex-col items-center justify-center">
@@ -857,11 +898,11 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
             </div>
           ) : (
             /* Chế độ xem 1 cửa sổ (Single Window Mode chuẩn A4) */
-            <div className="bg-white rounded-2xl shadow-lg border border-blue-300 overflow-hidden max-w-4xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-lg border border-blue-300 overflow-hidden w-full">
               <div className="bg-blue-950 text-white px-5 py-3 flex items-center justify-between border-b border-blue-800">
                 <h3 className="font-bold text-xs uppercase tracking-wider flex items-center">
                   <FileText size={15} className="mr-2 text-blue-300" />
-                  Giáo án tích hợp Năng lực số
+                  Giáo án tích hợp Năng lực số (Toàn văn)
                 </h3>
                 <span className="text-[11px] bg-red-600 text-white font-bold px-2.5 py-0.5 rounded-full">
                   Times New Roman 13.5pt
@@ -873,7 +914,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
                     rehypePlugins={[rehypeRaw]}
                     components={components as any}
                   >
-                    {getCleanResultForPreview(result)}
+                    {generateFullIntegratedPreview(originalContent, result)}
                   </ReactMarkdown>
                 ) : (
                   <p className="text-slate-400 text-center py-12 text-sm italic">

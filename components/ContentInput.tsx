@@ -178,67 +178,76 @@ const ContentInput: React.FC<ContentInputProps> = ({
   );
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 mb-6">
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center">
-          <div className="h-7 w-1.5 bg-blue-600 rounded-full mr-3"></div>
-          <h2 className="text-lg font-bold text-blue-950">Tài liệu giáo án đầu vào</h2>
-        </div>
-        {mathStatus && (
-          <div className="hidden sm:flex items-center text-xs text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-lg">
-            <Sparkles size={14} className="mr-1.5 text-green-600" />
-            <span>{mathStatus}</span>
-          </div>
+    <div className="flex flex-wrap items-center gap-2">
+      <input
+        type="file"
+        ref={lessonInputRef}
+        onChange={(e) => handleFileChange(e, true)}
+        accept=".pdf,.docx"
+        className="hidden"
+      />
+      <input
+        type="file"
+        ref={distInputRef}
+        onChange={(e) => handleFileChange(e, false)}
+        accept=".pdf,.docx"
+        className="hidden"
+      />
+
+      {/* Nút Upload Giáo án */}
+      <button
+        type="button"
+        onClick={() => lessonInputRef.current?.click()}
+        disabled={processingLesson}
+        className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center space-x-1.5 transition-all shadow-sm ${
+          lessonContent
+            ? 'bg-green-50 border-green-300 text-green-800 hover:bg-green-100/80'
+            : 'bg-white border-blue-200 text-blue-900 hover:bg-blue-50'
+        }`}
+        title="Tải lên Kế hoạch bài dạy (.docx hoặc .pdf)"
+      >
+        {processingLesson ? (
+          <Loader2 className="animate-spin text-blue-600" size={15} />
+        ) : lessonContent ? (
+          <CheckCircle className="text-green-600" size={15} />
+        ) : (
+          <FileText className="text-blue-600" size={15} />
         )}
-      </div>
+        <span className="truncate max-w-[200px]">
+          {lessonFileName ? lessonFileName : '📁 Chọn File Giáo án (.docx/.pdf)'}
+        </span>
+      </button>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Ô Upload Giáo án */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-700 flex items-center justify-between">
-            <span><span className="text-red-500 mr-1">*</span> File Kế hoạch bài dạy (Giáo án)</span>
-          </label>
-          <UploadBox
-            title="Tải lên File Giáo án"
-            subTitle="Tài liệu bài dạy cần tích hợp Năng lực số"
-            inputRef={lessonInputRef}
-            fileName={lessonFileName}
-            isProcessing={processingLesson}
-            isLesson={true}
-            hasContent={!!lessonContent}
-          />
-          {mathStatus && (
-            <p className="sm:hidden text-xs text-green-700 bg-green-50 p-2 rounded border border-green-200 mt-1">
-              {mathStatus}
-            </p>
-          )}
-          {!lessonContent && (
-            <p className="text-xs text-red-500 flex items-center mt-1 font-medium">
-              <AlertCircle size={12} className="mr-1" /> Vui lòng chọn file giáo án (.docx hoặc .pdf)
-            </p>
-          )}
-        </div>
+      {/* Nút Upload PPCT */}
+      <button
+        type="button"
+        onClick={() => distInputRef.current?.click()}
+        disabled={processingDist}
+        className={`px-3 py-1.5 rounded-xl border text-xs font-medium flex items-center space-x-1.5 transition-all shadow-sm ${
+          distributionContent
+            ? 'bg-green-50 border-green-300 text-green-800 hover:bg-green-100/80'
+            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+        }`}
+        title="Tải lên Phân phối chương trình (Không bắt buộc)"
+      >
+        {processingDist ? (
+          <Loader2 className="animate-spin text-blue-600" size={15} />
+        ) : distributionContent ? (
+          <CheckCircle className="text-green-600" size={15} />
+        ) : (
+          <FileUp className="text-slate-500" size={15} />
+        )}
+        <span className="truncate max-w-[180px]">
+          {distFileName ? distFileName : '📄 Chọn PPCT (Tùy chọn)'}
+        </span>
+      </button>
 
-        {/* Ô Upload PPCT */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-700 flex items-center justify-between">
-            <span>File Phân phối chương trình (PPCT)</span>
-            <span className="text-xs text-slate-400 font-normal">(Không bắt buộc)</span>
-          </label>
-          <UploadBox
-            title="Tải lên File PPCT"
-            subTitle="Để AI trích xuất NLS chính xác theo trường"
-            inputRef={distInputRef}
-            fileName={distFileName}
-            isProcessing={processingDist}
-            isLesson={false}
-            hasContent={!!distributionContent}
-          />
-          <p className="text-xs text-slate-500 mt-1">
-            💡 Tải PPCT lên giúp AI trích xuất nguyên văn YCCĐ Năng lực số áp dụng cho từng bài học.
-          </p>
-        </div>
-      </div>
+      {mathStatus && (
+        <span className="hidden xl:inline-flex items-center text-[11px] font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-1 rounded-lg">
+          <Sparkles size={12} className="mr-1 text-green-600" />
+          {mathStatus}
+        </span>
+      )}
     </div>
   );
 };
