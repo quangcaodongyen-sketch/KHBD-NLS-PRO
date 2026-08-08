@@ -545,6 +545,18 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
 
     let documentXml = await documentXmlFile.async('string');
 
+    // Chuyển chế độ xem mặc định sang Print Layout (tránh Web Layout làm hỏng định dạng hiển thị)
+    const settingsXmlFile = zip.file('word/settings.xml');
+    if (settingsXmlFile) {
+      let settingsXml = await settingsXmlFile.async('string');
+      if (settingsXml.includes('<w:view')) {
+        settingsXml = settingsXml.replace(/<w:view\s+w:val="[^"]*"/g, '<w:view w:val="print"');
+      } else {
+        settingsXml = settingsXml.replace(/(<w:settings[^>]*>)/, '$1<w:view w:val="print"/>');
+      }
+      zip.file('word/settings.xml', settingsXml);
+    }
+
     // Giữ nguyên toàn bộ cấu trúc bảng của giáo án gốc, không can thiệp vào tblLayout
 
     const sections = parseAllNLSSections(aiResult);
