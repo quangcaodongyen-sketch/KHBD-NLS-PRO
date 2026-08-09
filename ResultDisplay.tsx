@@ -382,8 +382,8 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
       '<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>',
       '<w:b w:val="0"/>',
       '<w:bCs w:val="0"/>',
-      '<w:i w:val="1"/>', // In nghiêng
-      '<w:iCs w:val="1"/>',
+      '<w:i w:val="0"/>', // Chữ thẳng (không nghiêng)
+      '<w:iCs w:val="0"/>',
       '<w:color w:val="FF0000"/>', // Màu đỏ
       '<w:sz w:val="26"/>', // Cỡ 13pt (26 half-points)
       '<w:szCs w:val="26"/>',
@@ -391,17 +391,22 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
     ].join('');
   };
 
-  const buildNlsPPr = (sourceParagraphXml: string = ''): string => {
+  const buildNlsPPr = (sourceParagraphXml: string = '', isBullet: boolean = false): string => {
     const spacing = extractSpacingFromParagraph(sourceParagraphXml);
     const jc = '<w:jc w:val="both"/>'; // Căn đều 2 bên
-    return `<w:pPr><w:ind w:firstLine="720"/>${spacing}${jc}</w:pPr>`; // Lùi lề 1.27cm (720 twips)
+    
+    if (isBullet) {
+      // Dùng w:left="720" và w:hanging="360" để dấu gạch ngang thụt một nửa, chữ thụt đủ 1.27cm, giúp rớt dòng vẫn thẳng
+      return `<w:pPr><w:ind w:left="720" w:hanging="360"/>${spacing}${jc}</w:pPr>`;
+    }
+    // Dòng thường thì thụt toàn bộ vào 1.27cm
+    return `<w:pPr><w:ind w:left="720"/>${spacing}${jc}</w:pPr>`;
   };
 
   const convertMarkdownToWordXml = (markdown: string, sourceParagraphXml: string = ''): string => {
     const lines = markdown.split('\n');
     let xml = '';
 
-    const nlsPPr = buildNlsPPr(sourceParagraphXml);
     const nlsRPr = buildNlsRPr(sourceParagraphXml);
 
     for (const line of lines) {
@@ -426,6 +431,9 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
       processedLine = processedLine.replace(/<\/?u>/g, '');
       processedLine = processedLine.replace(/<\/?red>/g, '');
       processedLine = processedLine.replace(/<br\s*\/?>/gi, '');
+
+      const isBullet = processedLine.startsWith('- ');
+      const nlsPPr = buildNlsPPr(sourceParagraphXml, isBullet);
 
       const content = escapeXml(processedLine);
 
@@ -740,9 +748,9 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, loading, original
         color: '#FF0000',
         fontFamily: "'Times New Roman', Times, serif",
         fontSize: '13pt',
-        fontStyle: 'italic',
+        fontStyle: 'normal',
         display: 'block',
-        textIndent: '1.27cm',
+        marginLeft: '1.27cm', // Đổi từ textIndent sang marginLeft để tất cả các dòng đều thụt vào, giống DOCX w:left
         textAlign: 'justify',
         marginTop: '0.2rem',
         marginBottom: '0.2rem'
